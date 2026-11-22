@@ -159,7 +159,11 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
         </section>
 
         <footer class="border-t border-white/10 bg-[#070D1A] py-8 text-center text-sm text-slate-400">
-            {{ t('brand') }} · {{ t('footer_note') }}
+            <p>{{ t('brand') }} · {{ t('footer_note') }}</p>
+            <p class="mt-2 text-xs text-slate-500">
+                {{ t('footer_credit') }}
+                <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-slate-300 underline decoration-slate-600 underline-offset-2 transition hover:text-brand-300">Reviv Solutions</a>
+            </p>
         </footer>
     </div>
 </template>
