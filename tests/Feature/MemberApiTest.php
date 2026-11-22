@@ -22,7 +22,8 @@ function apiMember(): array
 
 function asMember(Member $m): array
 {
-    return ['Authorization' => 'Bearer '.$m->portal_token, 'Accept' => 'application/json'];
+    // Mint a fresh plaintext token; only its hash is stored on the member.
+    return ['Authorization' => 'Bearer '.$m->rotatePortalToken(), 'Accept' => 'application/json'];
 }
 
 it('rejects missing and wrong tokens with 401', function () {
@@ -88,4 +89,11 @@ it('never exposes or mutates another member\'s bookings', function () {
 
     $this->deleteJson("/api/member/bookings/{$booking->id}", [], asMember($member))->assertNotFound();
     expect($booking->fresh()->status)->toBe('booked');
+});
+
+it('serves member API responses with no-store headers', function () {
+    [, $member] = apiMember();
+    $this->getJson('/api/member/profile', asMember($member))
+        ->assertOk()
+        ->assertHeader('Cache-Control', 'no-store, private');
 });

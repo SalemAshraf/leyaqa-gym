@@ -52,11 +52,15 @@ const freezeDays = ref({});
 
 const gym = computed(() => usePage().props.gym);
 const cardUrl = computed(() => route('card', props.member.qr_token));
+const portalLink = computed(() => usePage().props.flash?.portal_link);
 const portalCopied = ref(false);
 async function copyPortal() {
-    await navigator.clipboard.writeText(props.member.portal_url);
+    await navigator.clipboard.writeText(portalLink.value);
     portalCopied.value = true;
     setTimeout(() => (portalCopied.value = false), 2000);
+}
+function rotatePortal() {
+    router.post(route('members.portal-link', props.member.id), {}, { preserveScroll: true });
 }
 const waReminder = computed(() => waLink(
     props.member.phone,
@@ -73,12 +77,20 @@ const waReminder = computed(() => waLink(
                 <h2 class="text-xl font-bold text-ink-900">{{ member.name }}</h2>
                 <span class="flex flex-wrap items-center gap-2">
                     <a :href="cardUrl" target="_blank" class="btn-secondary btn-sm">{{ t('open_card') }}</a>
-                    <button type="button" class="btn-secondary btn-sm" @click="copyPortal">{{ portalCopied ? t('portal_copied') : t('copy_portal') }}</button>
+                    <button type="button" class="btn-secondary btn-sm" @click="rotatePortal">{{ t('regenerate_portal') }}</button>
                     <a v-if="member.balance > 0" :href="waReminder" target="_blank" rel="noopener" class="btn-secondary btn-sm !text-[#128C7E]">{{ t('wa_remind') }}</a>
                     <Badge v-if="member.balance > 0" tone="rose" class="!px-3 !py-1.5 !text-sm">
                         {{ t('has_balance') }}: <bdi>{{ money(member.balance, currency) }}</bdi>
                     </Badge>
                 </span>
+            </div>
+
+            <div v-if="portalLink" class="card border-2 border-brand-500">
+                <p class="text-sm font-semibold text-ink-900">{{ t('portal_link_ready') }}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <input :value="portalLink" readonly dir="ltr" class="w-full min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs" @focus="$event.target.select()">
+                    <button type="button" class="btn-primary btn-sm" @click="copyPortal">{{ portalCopied ? t('portal_copied') : t('copy_link') }}</button>
+                </div>
             </div>
 
             <div class="card">

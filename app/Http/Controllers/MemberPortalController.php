@@ -6,6 +6,7 @@ use App\Models\ClassBooking;
 use App\Models\GymClass;
 use App\Models\Member;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 
 /**
@@ -17,7 +18,9 @@ class MemberPortalController extends Controller
 {
     public function show(string $token)
     {
-        $member = Member::withoutGlobalScopes()->with('gym')->where('portal_token', $token)->firstOrFail();
+        $member = Member::findByPortalToken($token);
+        abort_unless($member, 404);
+        $member->load('gym');
         $gym = $member->gym;
         $today = now($gym->timezone);
         $subscription = $member->currentSubscription();
@@ -87,6 +90,32 @@ class MemberPortalController extends Controller
             'days' => $days,
             'token' => $token,
             'card_url' => route('card', $member->qr_token),
+        ]);
+    }
+
+    /**
+     * Web app manifest per member: "add to home screen" opens their portal
+     * directly (app-like install without a store listing).
+     */
+    public function manifest(string $token): JsonResponse
+    {
+        $member = Member::findByPortalToken($token);
+        abort_unless($member, 404);
+
+        return response()->json([
+            'name' => $member->gym->name.' - '.$member->name,
+            'short_name' => $member->gym->name,
+            'start_url' => route('portal.show', $token),
+            'scope' => route('portal.show', $token),
+            'display' => 'standalone',
+            'dir' => $member->gym->locale === 'ar' ? 'rtl' : 'ltr',
+            'background_color' => '#0a0a0a',
+            'theme_color' => '#0a0a0a',
+            'icons' => [
+                ['src' => '/icon.svg', 'sizes' => 'any', 'type' => 'image/svg+xml', 'purpose' => 'any'],
+                ['src' => '/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png'],
+                ['src' => '/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png'],
+            ],
         ]);
     }
 }

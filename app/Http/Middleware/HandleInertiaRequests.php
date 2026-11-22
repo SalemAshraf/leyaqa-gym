@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'checkin' => fn () => $request->session()->get('checkin'),
+                'portal_link' => fn () => $request->session()->get('portal_link'),
             ],
         ];
     }

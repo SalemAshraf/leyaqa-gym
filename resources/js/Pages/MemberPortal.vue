@@ -19,6 +19,7 @@ const flash = computed(() => page.props.flash?.success);
 const errors = computed(() => page.props.errors || {});
 
 const ar = computed(() => (props.gym.locale || 'ar') === 'ar');
+const manifestUrl = computed(() => route('portal.manifest', props.token));
 const dir = computed(() => (ar.value ? 'rtl' : 'ltr'));
 
 const L = computed(() => (ar.value
@@ -59,7 +60,14 @@ function cancelBooking(id) {
 </script>
 
 <template>
-    <Head :title="L.title" />
+    <Head :title="L.title">
+        <meta name="theme-color" content="#0a0a0a">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" :content="gym.name">
+        <link rel="manifest" :href="manifestUrl">
+        <link rel="apple-touch-icon" href="/icon-192.png">
+    </Head>
     <div :dir="dir" class="min-h-screen bg-slate-50 pb-16">
         <div class="bg-ink-900 px-5 pb-8 pt-6 text-white">
             <div class="mx-auto max-w-lg">

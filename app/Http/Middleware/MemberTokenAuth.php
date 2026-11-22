@@ -16,7 +16,7 @@ class MemberTokenAuth
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->bearerToken();
-        $member = $token ? Member::withoutGlobalScopes()->where('portal_token', $token)->first() : null;
+        $member = Member::findByPortalToken($token);
 
         abort_unless($member, 401, 'Invalid member token');
 

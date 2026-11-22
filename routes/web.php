@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::delete('leads/{lead}', [\App\Http\Controllers\LeadController::class, 'destroy'])->name('leads.destroy');
     Route::post('leads/{lead}/convert', [\App\Http\Controllers\LeadController::class, 'convert'])->name('leads.convert');
     Route::resource('members', MemberController::class)->only(['index', 'store', 'show', 'update']);
+    Route::post('members/{member}/portal-link', [MemberController::class, 'rotatePortalLink'])->name('members.portal-link');
     Route::resource('plans', PlanController::class)->only(['index', 'store', 'update']);
 
     Route::get('subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
@@ -116,11 +117,14 @@ Route::get('sitemap.xml', function () {
     return response($xml.'</urlset>\n', 200, ['Content-Type' => 'application/xml']);
 });
 
-Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('card');
+Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('card')->middleware('private.headers');
 
 // Member self-service portal (private portal_token link; no login needed).
-Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'show'])->name('portal.show');
-Route::post('my/{token}/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
-Route::delete('my/{token}/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
+Route::middleware('private.headers')->group(function () {
+    Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'show'])->name('portal.show');
+    Route::get('my/{token}/manifest.webmanifest', [\App\Http\Controllers\MemberPortalController::class, 'manifest'])->name('portal.manifest');
+    Route::post('my/{token}/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
+    Route::delete('my/{token}/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
+});
 
 require __DIR__.'/auth.php';

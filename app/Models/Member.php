@@ -29,7 +29,8 @@ class Member extends Model
                 $member->qr_token = (string) Str::uuid();
             }
             if (empty($member->portal_token)) {
-                $member->portal_token = (string) Str::uuid();
+                // Only the hash is stored; staff mint a usable link via rotation.
+                $member->portal_token = static::hashPortalToken((string) Str::uuid());
             }
             if (empty($member->joined_at)) {
                 $member->joined_at = now()->toDateString();
@@ -68,13 +69,36 @@ class Member extends Model
         return $this->hasMany(CheckIn::class);
     }
 
-    /**
-     * Private self-service link for the member (subscription, debt,
-     * class booking). Separate from the public door-scanner card link.
-     */
-    public function portalUrl(): string
+    public static function hashPortalToken(string $plain): string
     {
-        return route('portal.show', $this->portal_token);
+        return hash('sha256', $plain);
+    }
+
+    /**
+     * Resolve a member from the plaintext portal token carried by the private
+     * link / API bearer. The door QR token is never accepted here.
+     */
+    public static function findByPortalToken(?string $plain): ?self
+    {
+        if (empty($plain)) {
+            return null;
+        }
+
+        return static::withoutGlobalScopes()
+            ->where('portal_token', static::hashPortalToken($plain))
+            ->first();
+    }
+
+    /**
+     * Mint a new private portal secret; the old link stops working at once.
+     * The plaintext is returned once - only its hash is ever stored.
+     */
+    public function rotatePortalToken(): string
+    {
+        $plain = Str::random(48);
+        $this->forceFill(['portal_token' => static::hashPortalToken($plain)])->save();
+
+        return $plain;
     }
 
     public function currentSubscription(): ?Subscription

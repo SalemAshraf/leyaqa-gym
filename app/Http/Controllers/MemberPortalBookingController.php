@@ -14,7 +14,7 @@ class MemberPortalBookingController extends Controller
 {
     public function store(Request $request, string $token, ClassBookingManager $bookings)
     {
-        $member = Member::withoutGlobalScopes()->where('portal_token', $token)->firstOrFail();
+        $member = Member::findByPortalToken($token) ?? abort(404);
 
         $data = $request->validate([
             'class_id' => ['required', 'integer'],
@@ -35,7 +35,7 @@ class MemberPortalBookingController extends Controller
 
     public function destroy(Request $request, string $token, int $bookingId, ClassBookingManager $bookings)
     {
-        $member = Member::withoutGlobalScopes()->where('portal_token', $token)->firstOrFail();
+        $member = Member::findByPortalToken($token) ?? abort(404);
 
         // No tenant context on this public route: resolve without the gym scope,
         // then authorize strictly by ownership.

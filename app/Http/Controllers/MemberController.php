@@ -168,7 +168,6 @@ class MemberController extends Controller
                 'branch' => $member->branch?->name,
                 'joined_at' => $member->joined_at?->toDateString(),
                 'qr_token' => $member->qr_token,
-                'portal_url' => $member->portalUrl(),
                 'balance' => $member->outstandingBalance(),
             ],
             'subscriptions' => $member->subscriptions->sortByDesc('starts_at')->values()->map(fn ($s) => [
@@ -215,5 +214,19 @@ class MemberController extends Controller
         $member->update($data);
 
         return back()->with('success', 'تم تحديث بيانات العضو');
+    }
+
+    /**
+     * Mint a fresh private portal link for the member. The previous link is
+     * revoked immediately; the new URL flashes once for staff to copy/send.
+     */
+    public function rotatePortalLink(Request $request, Member $member)
+    {
+        abort_unless($request->user()->can('members.manage'), 403);
+        abort_unless($member->accessibleBy($request->user()), 404);
+
+        $plain = $member->rotatePortalToken();
+
+        return back()->with('portal_link', route('portal.show', $plain));
     }
 }

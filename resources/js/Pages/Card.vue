@@ -20,7 +20,9 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Head :title="labels.badge" />
+    <Head :title="labels.badge">
+        <meta name="theme-color" content="#0a0a0a">
+    </Head>
     <div :dir="dir" class="flex min-h-screen items-center justify-center bg-ink-900 p-6">
         <div class="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
             <img src="/icon.svg" class="mx-auto h-12 w-12 rounded-2xl" alt="" />

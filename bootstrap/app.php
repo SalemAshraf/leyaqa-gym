@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform.active' => \App\Http\Middleware\EnsurePlatformActive::class,
             'platform.admin' => \App\Http\Middleware\PlatformAdmin::class,
             'member.token' => \App\Http\Middleware\MemberTokenAuth::class,
+            'private.headers' => \App\Http\Middleware\PrivateContentHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
