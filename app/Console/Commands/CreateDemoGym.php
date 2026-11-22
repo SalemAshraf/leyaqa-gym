@@ -196,12 +196,12 @@ class CreateDemoGym extends Command
             }
         }
 
-        // Check-ins: spread over the past two weeks plus a burst today.
+        // Check-ins: spread over the past four weeks (fills date-range reports) plus a burst today.
         $checkIns = 0;
         foreach ($members as $i => $member) {
             $visits = 1 + ($i % 5);
             for ($v = 0; $v < $visits; $v++) {
-                $daysAgo = 1 + (($i * 3 + $v * 4) % 13);
+                $daysAgo = 1 + (($i * 3 + $v * 4) % 29);
                 CheckIn::create(['member_id' => $member->id, 'checked_in_at' => $today->copy()->subDays($daysAgo)->setTime(9 + ($i + $v) % 12, ($i * 7) % 60), 'method' => $v % 3 === 0 ? 'manual' : 'qr', 'result' => 'allowed']);
                 $checkIns++;
             }

@@ -41,16 +41,16 @@ const setStatus = (status) => router.post(route('platform.gyms.status', props.gy
             </div>
 
             <div class="card !p-0 overflow-x-auto">
-                <table class="table">
+                <table class="table stack">
                     <thead><tr><th>#</th><th>{{ t('plan') }}</th><th>{{ t('amount') }}</th><th>{{ t('period') }}</th><th>{{ t('status') }}</th><th></th></tr></thead>
                     <tbody>
                         <tr v-for="i in invoices" :key="i.id">
-                            <td class="text-slate-400">{{ i.id }}</td>
-                            <td>{{ i.plan_ar || '—' }}</td>
-                            <td>{{ i.amount_cents == null ? '—' : num(i.amount_cents / 100) + ' ' + i.currency }}</td>
-                            <td class="text-slate-500" dir="ltr">{{ i.period }}</td>
-                            <td><Badge :tone="invTones[i.status]">{{ t('inv_' + i.status) }}</Badge></td>
-                            <td>
+                            <td class="text-slate-400" data-label="#">{{ i.id }}</td>
+                            <td :data-label="t('plan')">{{ i.plan_ar || '—' }}</td>
+                            <td :data-label="t('amount')">{{ i.amount_cents == null ? '—' : num(i.amount_cents / 100) + ' ' + i.currency }}</td>
+                            <td class="text-slate-500" dir="ltr" :data-label="t('period')">{{ i.period }}</td>
+                            <td :data-label="t('status')"><Badge :tone="invTones[i.status]">{{ t('inv_' + i.status) }}</Badge></td>
+                            <td data-label="">
                             <div v-if="i.status === 'pending'" class="flex items-center justify-end gap-2">
                                 <input v-if="i.amount_cents == null" v-model.number="amounts[i.id]" type="number" min="0" step="0.01" :placeholder="t('collected_amount')" class="input !w-28 !py-1.5 text-sm" dir="ltr" />
                                 <button @click="markPaid(i)" class="text-sm font-semibold text-emerald-700 hover:text-emerald-600">{{ t('confirm_paid') }}</button>

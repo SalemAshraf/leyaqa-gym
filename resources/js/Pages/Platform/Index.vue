@@ -16,7 +16,7 @@ const tones = { trialing: 'brand', active: 'green', past_due: 'amber', suspended
         <div class="space-y-4">
             <h2 class="text-xl font-bold text-ink-900">{{ t('platform_admin') }}</h2>
             <div class="card !p-0 overflow-x-auto">
-                <table class="table">
+                <table class="table stack">
                     <thead>
                         <tr>
                             <th>{{ t('gym_name') }}</th><th>{{ t('status') }}</th><th>{{ t('plan') }}</th>
@@ -25,14 +25,14 @@ const tones = { trialing: 'brand', active: 'green', past_due: 'amber', suspended
                     </thead>
                     <tbody>
                         <tr v-for="g in gyms.data" :key="g.id">
-                            <td class="font-semibold text-ink-900">{{ g.name }} <span class="text-xs text-slate-400">{{ g.country }}</span></td>
-                            <td><Badge :tone="tones[g.status]">{{ t('pstatus_' + g.status) }}</Badge></td>
-                            <td class="text-slate-500">{{ g.plan_ar || '—' }}</td>
-                            <td>{{ g.status === 'trialing' ? num(g.trial_days_left) + ' ' + t('days') : '—' }}</td>
-                            <td class="text-slate-500">{{ g.renews_at || '—' }}</td>
-                            <td>{{ num(g.members_count) }}</td>
-                            <td class="text-slate-400 text-xs">{{ g.created_at }}</td>
-                            <td><Link :href="route('platform.gyms.show', g.id)" class="text-sm font-semibold text-brand-700 hover:text-brand-600">{{ t('manage') }}</Link></td>
+                            <td class="font-semibold text-ink-900" :data-label="t('gym_name')">{{ g.name }} <span class="text-xs text-slate-400">{{ g.country }}</span></td>
+                            <td :data-label="t('status')"><Badge :tone="tones[g.status]">{{ t('pstatus_' + g.status) }}</Badge></td>
+                            <td class="text-slate-500" :data-label="t('plan')">{{ g.plan_ar || '—' }}</td>
+                            <td :data-label="t('trial')">{{ g.status === 'trialing' ? num(g.trial_days_left) + ' ' + t('days') : '—' }}</td>
+                            <td class="text-slate-500" :data-label="t('renews')">{{ g.renews_at || '—' }}</td>
+                            <td :data-label="t('members')">{{ num(g.members_count) }}</td>
+                            <td class="text-slate-400 text-xs" :data-label="t('joined')">{{ g.created_at }}</td>
+                            <td data-label=""><Link :href="route('platform.gyms.show', g.id)" class="text-sm font-semibold text-brand-700 hover:text-brand-600">{{ t('manage') }}</Link></td>
                         </tr>
                     </tbody>
                 </table>

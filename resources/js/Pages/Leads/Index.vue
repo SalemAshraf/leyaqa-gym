@@ -97,7 +97,7 @@ function remove(lead) {
             <p v-if="!leads.data.length" class="card text-center text-sm text-slate-400">{{ t('no_leads') }}</p>
 
             <div v-else class="card !p-0 overflow-x-auto">
-                <table class="table">
+                <table class="table stack">
                     <thead>
                         <tr>
                             <th>{{ t('lead_name') }}</th>
@@ -110,12 +110,12 @@ function remove(lead) {
                     </thead>
                     <tbody>
                         <tr v-for="l in leads.data" :key="l.id">
-                            <td class="font-semibold text-ink-900">{{ l.name }}</td>
-                            <td><bdi dir="ltr">{{ l.phone }}</bdi></td>
-                            <td class="text-slate-500">{{ l.source || '—' }}</td>
-                            <td><Badge :tone="tones[l.status]">{{ t('lead_' + l.status) }}</Badge></td>
-                            <td class="text-slate-400 text-xs">{{ l.created_at }}</td>
-                            <td class="whitespace-nowrap text-end">
+                            <td class="font-semibold text-ink-900" :data-label="t('lead_name')">{{ l.name }}</td>
+                            <td :data-label="t('lead_phone')"><bdi dir="ltr">{{ l.phone }}</bdi></td>
+                            <td class="text-slate-500" :data-label="t('lead_source')">{{ l.source || '—' }}</td>
+                            <td :data-label="t('status')"><Badge :tone="tones[l.status]">{{ t('lead_' + l.status) }}</Badge></td>
+                            <td class="text-slate-400 text-xs" :data-label="t('created_at')">{{ l.created_at }}</td>
+                            <td class="whitespace-nowrap text-end" data-label="">
                                 <button v-if="l.status !== 'converted'" @click="convert(l)" class="text-sm font-semibold text-emerald-700 hover:text-emerald-600">{{ t('convert_to_member') }}</button>
                                 <Link v-else :href="route('members.show', l.member_id)" class="text-sm font-semibold text-brand-700 hover:text-brand-600">{{ t('view_member') }}</Link>
                                 <button @click="edit(l)" class="ms-3 text-sm font-semibold text-brand-700 hover:text-brand-600">{{ t('edit') }}</button>

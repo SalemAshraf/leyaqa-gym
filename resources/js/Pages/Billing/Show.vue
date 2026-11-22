@@ -53,15 +53,15 @@ function subscribe(plan) {
             <p class="text-xs text-slate-400">{{ t('billing_note') }}</p>
 
             <div v-if="invoices.length" class="card !p-0 overflow-x-auto">
-                <table class="table">
+                <table class="table stack">
                     <thead><tr><th>#</th><th>{{ t('plan') }}</th><th>{{ t('amount') }}</th><th>{{ t('period') }}</th><th>{{ t('status') }}</th></tr></thead>
                     <tbody>
                         <tr v-for="i in invoices" :key="i.id">
-                            <td class="text-slate-400">{{ i.id }}</td>
-                            <td>{{ locale === 'ar' ? i.plan_ar : i.plan_en }}</td>
-                            <td>{{ i.amount_cents == null ? '—' : num(i.amount_cents / 100) + ' ' + i.currency }}</td>
-                            <td class="text-slate-500" dir="ltr">{{ i.period }}</td>
-                            <td><Badge :tone="invTones[i.status]">{{ t('inv_' + i.status) }}</Badge></td>
+                            <td class="text-slate-400" data-label="#">{{ i.id }}</td>
+                            <td :data-label="t('plan')">{{ locale === 'ar' ? i.plan_ar : i.plan_en }}</td>
+                            <td :data-label="t('amount')">{{ i.amount_cents == null ? '—' : num(i.amount_cents / 100) + ' ' + i.currency }}</td>
+                            <td class="text-slate-500" dir="ltr" :data-label="t('period')">{{ i.period }}</td>
+                            <td :data-label="t('status')"><Badge :tone="invTones[i.status]">{{ t('inv_' + i.status) }}</Badge></td>
                         </tr>
                     </tbody>
                 </table>
