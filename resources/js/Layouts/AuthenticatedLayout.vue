@@ -29,9 +29,9 @@ const links = computed(() => [
                     <div class="flex">
                         <div class="flex shrink-0 items-center gap-2">
                             <span class="text-xl font-bold text-emerald-700">قوّة</span>
-                            <span v-if="gym" class="text-sm text-gray-500">{{ gym.name }}</span>
+                            <span v-if="gym" class="max-w-[180px] truncate text-sm text-gray-500">{{ gym.name }}</span>
                         </div>
-                        <div class="hidden space-x-6 space-x-reverse sm:-ms-10 sm:me-10 sm:flex">
+                        <div class="hidden space-x-5 space-x-reverse sm:ms-8 sm:flex">
                             <Link
                                 v-for="link in links"
                                 :key="link.href"

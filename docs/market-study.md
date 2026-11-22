@@ -52,3 +52,28 @@ https://gymciety.net/guides/best-gym-management-software-uae
 - هل الجيم الصغير في مصر ملزم حاليًا بإيصال إلكتروني B2C؟ (يحدد أولوية تكامل ETA)
 - استعداد الدفع الفعلي: لازم مقابلات مع 5 أصحاب جيمات قبل الالتزام بتسعير نهائي.
 - الدفع الإلكتروني: كاش ما زال الغالب؛ تكامل Paymob/Fawry (مصر) وmada (السعودية) مرحلة لاحقة.
+
+## تغطية البحث حسب الدولة (22 نوفمبر 2026)
+
+| الدولة | عمق البحث | أبرز ما وُجد |
+|---|---|---|
+| مصر | بحث مباشر في مصادر مصرية | SBS (ERP)، Karneh (موبايل أولاً)، Vibe؛ VAT ‏14٪ وسؤال الإيصال الإلكتروني مفتوح |
+| السعودية | بحث في المتطلبات المنشورة + مورد محلي | Aqid ERP؛ ZATCA مرحلة ثانية (UBL 2.1 + QR)؛ VAT ‏15٪ |
+| الإمارات | مقارنة طرف ثالث (Gymciety، متحيزة) + أسعار معلنة | Gymciety / GymViz / GymRoute / GymMaster بالدرهم أو الدولار |
+| الكويت | صفحات موردين موجّهة للكويت | ActiveFlow (كويتي، تجربة مجانية حتى 300 عضو، Grow ‏99$ ≈ 30 د.ك، كي نت عبر بوابة محلية)، GymViz (KNET عبر MyFatoorah)، Sigma Tech (كويتي، +1000 عميل خليجي)، Gym Thing. لا VAT في الكويت وقت كتابة المصادر |
+| قطر | صفحات موردين موجّهة لقطر | GymViz (QAR، QPAY/MyFatoorah)، Elokra Gym Pro (قطري، تسعير بالريال)، Welcome Tech Gym CRM (قطري، بصمة + رواتب)، Gym Thing. لا VAT في قطر وقت كتابة المصادر |
+| البحرين | صفحات موردين موجّهة للبحرين | تمرّن Tamarran (بحريني)، Gym Thing (مبني في البحرين، BenefitPay)، GymViz (BHD + BenefitPay) |
+| عُمان | صفحات موردين موجّهة لعُمان | Gymciety مسقط، GymViz (OMR، Thawani/MyFatoorah)، Gym Thing عُمان، Igymsoft |
+
+ملاحظة مهمة: بحث الكويت/قطر/البحرين/عُمان مبني على صفحات تسويق الموردين أنفسهم الموجّهة لكل دولة (ادعاءات المورد عن نفسه)، وليس تحققًا ميدانيًا من التوفر الفعلي أو الأسعار. دولتا العمق الحقيقي هما مصر ثم السعودية/الإمارات بدرجة أقل.
+
+### مصادر الخليج الإضافية
+- https://activeflowapp.com/ar/gym-management-software-kuwait-ar/
+- https://gymviz.app/locations/kuwait ، /qatar ، /bahrain ، /oman
+- https://sigmatech.com.kw/ar/sectors/gyms
+- https://thing.bh/ar/gym-software/ (البحرين، وله صفحات للكويت وقطر وعُمان)
+- https://elokra.com/products/gym-pro/
+- https://welcometech.qa/gym-fitness-crm/
+- https://tamarran.co/sports-management-software-bahrain/
+- https://gymciety.net/locations/kuwait-city ، /doha ، /muscat
+- https://gymsoftwareoman.com/
