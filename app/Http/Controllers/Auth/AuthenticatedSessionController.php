@@ -33,6 +33,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Platform admins hold no gym membership: the tenant dashboard has nothing
+        // for them, so land them on the platform panel instead.
+        $user = $request->user();
+        if ($user->isPlatformAdmin() && $user->gym_id === null) {
+            return redirect()->intended(route('platform.index', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

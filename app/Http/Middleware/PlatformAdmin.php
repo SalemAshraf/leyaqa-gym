@@ -14,10 +14,7 @@ class PlatformAdmin
 
         // Unverified emails cannot grant platform access: a tenant user who types an
         // admin address into their profile stays unverified until they prove ownership.
-        abort_unless(
-            $user && $user->hasVerifiedEmail() && in_array($user->email, config('platform.admin_emails', []), true),
-            403
-        );
+        abort_unless($user && $user->hasVerifiedEmail() && $user->isPlatformAdmin(), 403);
 
         return $next($request);
     }

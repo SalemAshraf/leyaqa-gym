@@ -33,7 +33,7 @@ class HandleInertiaRequests extends Middleware
             'platform' => $user ? [
                 'status' => $user->gym?->platform_status,
                 'trial_days_left' => $user->gym?->trialDaysLeft(),
-                'is_admin' => in_array($user->email, config('platform.admin_emails', []), true),
+                'is_admin' => $user->isPlatformAdmin(),
             ] : null,
             'locale' => $user?->locale ?? $request->session()->get('locale') ?? $user?->gym?->locale ?? 'ar',
             'flash' => [

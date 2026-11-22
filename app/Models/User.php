@@ -26,7 +26,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_platform_admin' => 'boolean',
         ];
+    }
+
+    /**
+     * Platform-area access: a DB grant on the user row (provisioned by
+     * `platform:admin`), with the env-listed emails kept as a fallback.
+     * Deliberately NOT mass-assignable.
+     */
+    public function isPlatformAdmin(): bool
+    {
+        return $this->is_platform_admin || in_array($this->email, config('platform.admin_emails', []), true);
     }
 
     public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
