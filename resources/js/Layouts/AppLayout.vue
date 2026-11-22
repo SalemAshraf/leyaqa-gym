@@ -76,7 +76,7 @@ const toggleLocale = () => router.post(route('locale'), { locale: locale.value =
             </button>
             <Link :href="route('profile.edit')" class="m-3 flex items-center gap-3 rounded-xl bg-slate-50 p-3 hover:bg-slate-100" :class="collapsed ? 'lg:m-2 lg:justify-center lg:p-2' : ''" :title="user.name" @click="open = false">
                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink-900 text-sm font-bold text-brand-300">{{ initials }}</span>
-                <span class="min-w-0" :class="collapsed ? 'lg:hidden' : ''"><span class="block truncate text-sm font-semibold text-ink-900">{{ user.name }}</span><span class="block text-xs text-slate-500">{{ t('r_' + (user.role || 'owner')) }}</span></span>
+                <span class="min-w-0" :class="collapsed ? 'lg:hidden' : ''"><span class="block truncate text-sm font-semibold text-ink-900">{{ user.name }}</span><span class="block text-xs text-slate-500">{{ t('r_' + (user.role || (page.props.platform?.is_admin ? 'platform_admin' : 'owner'))) }}</span></span>
             </Link>
         </aside>
         <div v-if="open" class="fixed inset-0 z-20 bg-ink-900/40 backdrop-blur-[1px] lg:hidden" @click="open = false" />

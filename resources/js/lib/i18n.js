@@ -9,7 +9,7 @@ const dict = {
         language: 'English', save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', add: 'إضافة', search: 'بحث',
         confirm_delete: 'متأكد من الحذف؟', back: 'رجوع', empty: 'مفيش بيانات لسه', saved: 'اتحفظ',
         nav_collapse: 'اطوِ القائمة', nav_expand: 'وسّع القائمة', search_ph: 'ابحث بالاسم أو الموبايل…',
-        r_owner: 'المالك', r_reception: 'ريسبشن',
+        r_owner: 'المالك', r_reception: 'ريسبشن', r_platform_admin: 'مدير المنصة',
         // dashboard
         kpi_members: 'الأعضاء النشطون', kpi_subs: 'اشتراكات سارية', kpi_in_today: 'حضور اليوم', kpi_denied: 'مرفوض اليوم',
         kpi_revenue: 'إيراد هذا الشهر', kpi_outstanding: 'مستحقات لم تُدفع', revenue_trend: 'الإيراد آخر ٦ شهور',
@@ -183,7 +183,7 @@ const dict = {
         language: 'عربي', save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', add: 'Add', search: 'Search',
         confirm_delete: 'Sure you want to delete?', back: 'Back', empty: 'No data yet', saved: 'Saved',
         nav_collapse: 'Collapse menu', nav_expand: 'Expand menu', search_ph: 'Search name or phone…',
-        r_owner: 'Owner', r_reception: 'Reception',
+        r_owner: 'Owner', r_reception: 'Reception', r_platform_admin: 'Platform admin',
         kpi_members: 'Active members', kpi_subs: 'Active subscriptions', kpi_in_today: 'Check-ins today', kpi_denied: 'Denied today',
         kpi_revenue: 'Revenue this month', kpi_outstanding: 'Outstanding balances', revenue_trend: 'Revenue, last 6 months',
         attendance_today: "Today's check-ins by hour", plan_mix: 'Active subscriptions by plan',
