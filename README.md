@@ -135,7 +135,7 @@ New platform plans are managed from the platform admin area, not the environment
 `php artisan gym:demo` creates **one** demo gym ("جيم التجمع — بيانات تجريبية") with two logins (owner and reception) and a synthetic dataset: ~50 members, plans, subscriptions in every state, partial payments and debtors, classes, and two weeks of check-ins. All names, phones and payments are fictional.
 
 - It is additive and refuses to run if the demo accounts already exist — it never touches existing data.
-- It asks for the demo password on a hidden prompt; leave it empty and it generates one and prints it once.
+- It takes the demo password from a protected 0600 file (`--password-file`) or a hidden prompt; a password is never generated or printed.
 - In production it additionally requires `--force`.
 
 ## Deployment notes

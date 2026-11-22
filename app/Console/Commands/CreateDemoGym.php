@@ -17,7 +17,6 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -28,7 +27,7 @@ use Spatie\Permission\Models\Role;
  */
 class CreateDemoGym extends Command
 {
-    protected $signature = 'gym:demo {--force : Required when APP_ENV=production}';
+    protected $signature = 'gym:demo {--force : Required when APP_ENV=production} {--password-file= : Path to a 0600 file holding the demo password}';
 
     protected $description = 'Create an isolated demo gym with synthetic data and demo logins (additive, refuses to overwrite)';
 
@@ -46,11 +45,21 @@ class CreateDemoGym extends Command
             return self::FAILURE;
         }
 
-        $password = $this->secret('Password for the demo logins (leave empty to generate one)');
-        $generated = false;
-        if (! $password) {
-            $password = Str::password(16);
-            $generated = true;
+        $password = null;
+        if ($file = $this->option('password-file')) {
+            if (! is_file($file) || (fileperms($file) & 0777) !== 0600) {
+                $this->error('Password file must exist and have 0600 permissions.');
+
+                return self::FAILURE;
+            }
+            $password = trim((string) file_get_contents($file));
+        } else {
+            $password = $this->secret('Password for the demo logins (input hidden)');
+        }
+        if (! $password || strlen($password) < 12) {
+            $this->error('Password must be at least 12 characters. Provide it via --password-file (0600 file) or the hidden prompt. A password is never generated or printed.');
+
+            return self::FAILURE;
         }
 
         Permissions::sync();
@@ -210,9 +219,7 @@ class CreateDemoGym extends Command
         $this->info('Members: '.Member::count().' | Subscriptions: '.Subscription::count().' | Payments: '.$paymentsCount.' | Check-ins: '.$checkIns);
         $this->info('Owner login:     demo@example.com');
         $this->info('Reception login: reception@example.com');
-        if ($generated) {
-            $this->warn('Generated password (shown once, store it in the vault immediately): '.$password);
-        }
+        $this->info('Password: as provided via --password-file or the hidden prompt (never printed).');
 
         return self::SUCCESS;
     }
