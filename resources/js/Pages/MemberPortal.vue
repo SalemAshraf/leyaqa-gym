@@ -20,6 +20,8 @@ const errors = computed(() => page.props.errors || {});
 
 const ar = computed(() => (props.gym.locale || 'ar') === 'ar');
 const manifestUrl = computed(() => route('portal.manifest', props.token));
+// Stored coach names often already include the title (كابتن أحمد) - don't double it.
+const coachName = (n) => (n || '').replace(/^(الكابتن|كابتن|captain|coach)\s+/i, '');
 const dir = computed(() => (ar.value ? 'rtl' : 'ltr'));
 
 const L = computed(() => (ar.value
@@ -129,7 +131,7 @@ function cancelBooking(id) {
                         <div class="min-w-0">
                             <p class="truncate text-sm font-semibold text-ink-900">{{ cls.name }}</p>
                             <p class="text-xs text-slate-400">
-                                {{ cls.start_time }} · {{ L.minutes.replace('{n}', cls.duration_minutes) }}<span v-if="cls.coach"> · {{ L.coach.replace('{n}', cls.coach) }}</span>
+                                {{ cls.start_time }} · {{ L.minutes.replace('{n}', cls.duration_minutes) }}<span v-if="cls.coach"> · {{ L.coach.replace('{n}', coachName(cls.coach)) }}</span>
                             </p>
                         </div>
                         <div class="shrink-0">

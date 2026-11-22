@@ -20,6 +20,7 @@ class Member extends Model
     protected $casts = [
         'birthdate' => 'date',
         'joined_at' => 'date',
+        'portal_token_issued_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -31,6 +32,7 @@ class Member extends Model
             if (empty($member->portal_token)) {
                 // Only the hash is stored; staff mint a usable link via rotation.
                 $member->portal_token = static::hashPortalToken((string) Str::uuid());
+                $member->portal_token_issued_at = now();
             }
             if (empty($member->joined_at)) {
                 $member->joined_at = now()->toDateString();
@@ -84,9 +86,22 @@ class Member extends Model
             return null;
         }
 
-        return static::withoutGlobalScopes()
+        $member = static::withoutGlobalScopes()
+            ->with('gym')
             ->where('portal_token', static::hashPortalToken($plain))
             ->first();
+
+        // Lifecycle: links expire after the gym's configured window
+        // (portal_link_days; 0 = never). Expired links are simply invalid.
+        if ($member) {
+            $days = (int) ($member->gym?->portal_link_days ?? 90);
+            if ($days > 0 && $member->portal_token_issued_at
+                && $member->portal_token_issued_at->addDays($days)->isPast()) {
+                return null;
+            }
+        }
+
+        return $member;
     }
 
     /**
@@ -96,7 +111,10 @@ class Member extends Model
     public function rotatePortalToken(): string
     {
         $plain = Str::random(48);
-        $this->forceFill(['portal_token' => static::hashPortalToken($plain)])->save();
+        $this->forceFill([
+            'portal_token' => static::hashPortalToken($plain),
+            'portal_token_issued_at' => now(),
+        ])->save();
 
         return $plain;
     }

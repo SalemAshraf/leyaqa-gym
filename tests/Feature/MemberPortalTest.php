@@ -156,3 +156,25 @@ it('does not hand staff a stored portal URL on the member page', function () {
         ->assertOk()
         ->assertInertia(fn ($page) => $page->missing('member.portal_url'));
 });
+
+it('expires portal links after the gym-configured lifetime', function () {
+    [$gym, $member, , $plain] = portalMember();
+
+    // Default 90 days: a link issued 91 days ago is invalid.
+    $member->forceFill(['portal_token_issued_at' => now()->subDays(91)])->save();
+    $this->get("/my/{$plain}")->assertNotFound();
+
+    // 0 disables expiry: the same link works again.
+    $gym->update(['portal_link_days' => 0]);
+    $this->get("/my/{$plain}")->assertOk();
+});
+
+it('lets the owner set the portal link lifetime from settings', function () {
+    [$gym, $member, , $plain, $owner] = portalMember();
+    $this->actingAs($owner)->patch(route('settings.portal-link'), ['portal_link_days' => 30])
+        ->assertSessionHasNoErrors();
+    expect($gym->fresh()->portal_link_days)->toBe(30);
+
+    $this->actingAs($owner)->patch(route('settings.portal-link'), ['portal_link_days' => 400])
+        ->assertSessionHasErrors('portal_link_days');
+});

@@ -36,6 +36,7 @@ class SettingsController extends Controller
                 'enabled' => (bool) $gym->reminders_enabled,
                 'days_before' => (int) $gym->reminder_days_before,
             ],
+            'portal_link_days' => (int) ($gym->portal_link_days ?? 90),
         ]);
     }
 
@@ -68,6 +69,18 @@ class SettingsController extends Controller
             'reminders_enabled' => $data['enabled'],
             'reminder_days_before' => $data['days_before'],
         ])->save();
+
+        return back()->with('success', 'تم حفظ الإعدادات');
+    }
+
+    /** Member portal link lifetime in days (0 = never expires). */
+    public function portalLinkSave(Request $request)
+    {
+        abort_unless($request->user()->can('gym.manage'), 403);
+        $data = $request->validate([
+            'portal_link_days' => 'required|integer|min:0|max:365',
+        ]);
+        $request->user()->gym->forceFill(['portal_link_days' => $data['portal_link_days']])->save();
 
         return back()->with('success', 'تم حفظ الإعدادات');
     }

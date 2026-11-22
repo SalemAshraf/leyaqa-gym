@@ -5,7 +5,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object });
+const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object, portal_link_days: Number });
 const { t } = useI18n();
 
 const form = useForm({
@@ -28,6 +28,10 @@ function toggleAi() {
 }
 
 const reminderDays = ref(props.reminders.days_before);
+const portalLinkDays = ref(props.portal_link_days);
+function savePortalLink() {
+    router.patch(route('settings.portal-link'), { portal_link_days: portalLinkDays.value }, { preserveScroll: true });
+}
 function saveReminders(enabled) {
     router.patch(route('settings.reminders'), { enabled, days_before: reminderDays.value }, { preserveScroll: true });
 }
@@ -112,6 +116,17 @@ function disconnect(family) {
                 <div v-if="reminders.enabled" class="flex items-center gap-3 text-sm">
                     <label class="text-slate-600">{{ t('reminders_days') }}</label>
                     <input v-model.number="reminderDays" type="number" min="1" max="14" class="input w-24" @change="saveReminders(true)" />
+                </div>
+            </div>
+            <div class="card space-y-4">
+                <div>
+                    <div class="font-bold text-ink-900">{{ t('portal_link_title') }}</div>
+                    <p class="text-sm text-slate-500">{{ t('portal_link_desc') }}</p>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                    <label class="text-slate-600">{{ t('portal_link_days') }}</label>
+                    <input v-model.number="portalLinkDays" type="number" min="0" max="365" class="input w-24" dir="ltr">
+                    <button @click="savePortalLink" class="btn-secondary btn-sm">{{ t('save') }}</button>
                 </div>
             </div>
 
