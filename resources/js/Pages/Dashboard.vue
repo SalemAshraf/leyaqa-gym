@@ -89,7 +89,7 @@ const revenueSeries = props.revenueTrend.map((r) => r.revenue);
                         <li v-for="(c, i) in recentCheckIns" :key="i" class="flex items-center justify-between gap-2 px-5 py-3 text-sm">
                             <Link :href="route('members.show', c.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ c.member }}</Link>
                             <span class="flex items-center gap-2">
-                                <span class="text-xs text-slate-400">{{ date(c.checked_in_at, true) }}</span>
+                                <bdi class="text-xs text-slate-400" dir="ltr">{{ c.checked_in_at }}</bdi>
                                 <Badge :tone="c.result === 'allowed' ? 'green' : 'rose'">{{ c.result === 'allowed' ? t('entered') : t('denied') }}</Badge>
                             </span>
                         </li>

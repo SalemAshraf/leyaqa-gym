@@ -51,7 +51,7 @@ class DashboardController extends Controller
         // Revenue of the last 6 calendar months (gym timezone), grouped in PHP
         // so the query stays identical on SQLite and MySQL.
         $trendStart = $today->copy()->startOfMonth()->subMonths(5);
-        $payments6m = Payment::where('paid_at', '>=', $trendStart)->get(['amount', 'paid_at']);
+        $payments6m = Payment::where('paid_at', '>=', $trendStart->copy()->setTimezone('UTC'))->get(['amount', 'paid_at']);
         $revenueTrend = collect(CarbonPeriod::create($trendStart, '1 month', $today->copy()->startOfMonth()))
             ->map(function (Carbon $monthStart) use ($payments6m, $gym) {
                 $key = $monthStart->format('Y-m');
@@ -63,7 +63,10 @@ class DashboardController extends Controller
             })->values();
 
         // Today's allowed check-ins grouped by hour (gym timezone).
-        $todayCheckIns = CheckIn::whereDate('checked_in_at', $today->toDateString())
+        // "Today" is the gym-local day; timestamps are stored in UTC.
+        $todayStartUtc = $today->copy()->setTimezone('UTC');
+        $todayEndUtc = $today->copy()->endOfDay()->setTimezone('UTC');
+        $todayCheckIns = CheckIn::whereBetween('checked_in_at', [$todayStartUtc, $todayEndUtc])
             ->where('result', 'allowed')
             ->get(['checked_in_at']);
         $byHour = $todayCheckIns
@@ -98,8 +101,8 @@ class DashboardController extends Controller
                 'members' => Member::where('status', 'active')->count(),
                 'active_subscriptions' => $activeSubscriptions->count(),
                 'checkins_today' => $todayCheckIns->count(),
-                'denied_today' => CheckIn::whereDate('checked_in_at', $today->toDateString())->where('result', 'denied')->count(),
-                'revenue_month' => (float) Payment::whereBetween('paid_at', [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()->endOfDay()])->sum('amount'),
+                'denied_today' => CheckIn::whereBetween('checked_in_at', [$todayStartUtc, $todayEndUtc])->where('result', 'denied')->count(),
+                'revenue_month' => (float) Payment::whereBetween('paid_at', [$today->copy()->startOfMonth()->setTimezone('UTC'), $today->copy()->endOfMonth()->endOfDay()->setTimezone('UTC')])->sum('amount'),
                 'outstanding_total' => round($debtors->sum('balance'), 2),
             ],
             'expiringSoon' => $expiringSoon,

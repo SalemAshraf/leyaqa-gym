@@ -101,7 +101,7 @@ class MemberController extends Controller
                 'freeze_days_allowed' => $s->plan->freeze_days_allowed,
             ]),
             'checkIns' => $member->checkIns->map(fn ($c) => [
-                'checked_in_at' => $c->checked_in_at->toDateTimeString(),
+                'checked_in_at' => $c->checked_in_at->copy()->setTimezone($request->user()->gym->timezone)->toDateTimeString(),
                 'result' => $c->result,
                 'denial_reason' => $c->denial_reason,
                 'method' => $c->method,

@@ -14,18 +14,21 @@ class CheckInController extends Controller
     {
         abort_unless($request->user()->can('checkins.manage'), 403);
 
-        $today = now($request->user()->gym->timezone)->toDateString();
+        $gymTz = $request->user()->gym->timezone;
+        // Day boundaries in the gym's timezone, compared against UTC-stored timestamps.
+        $todayStartUtc = now($gymTz)->startOfDay()->setTimezone('UTC');
+        $todayEndUtc = now($gymTz)->endOfDay()->setTimezone('UTC');
 
         return Inertia::render('CheckIns/Index', [
             'today' => CheckIn::with('member')
-                ->whereDate('checked_in_at', $today)
+                ->whereBetween('checked_in_at', [$todayStartUtc, $todayEndUtc])
                 ->orderByDesc('checked_in_at')
                 ->limit(50)
                 ->get()
                 ->map(fn (CheckIn $c) => [
                     'id' => $c->id,
                     'member' => $c->member->name,
-                    'checked_in_at' => $c->checked_in_at->toDateTimeString(),
+                    'checked_in_at' => $c->checked_in_at->copy()->setTimezone($request->user()->gym->timezone)->toDateTimeString(),
                     'result' => $c->result,
                     'denial_reason' => $c->denial_reason,
                     'method' => $c->method,
