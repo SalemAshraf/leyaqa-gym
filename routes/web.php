@@ -102,6 +102,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('locale', \App\Http\Controllers\LocaleController::class)->name('locale');
+Route::get('robots.txt', function () {
+    return response("User-agent: *\nAllow: /\nDisallow: /platform\nDisallow: /dashboard\nDisallow: /my/\nDisallow: /card/\nDisallow: /api/\n\nSitemap: ".url('/sitemap.xml')."\n", 200, ['Content-Type' => 'text/plain']);
+});
+
+Route::get('sitemap.xml', function () {
+    $urls = ['/', '/login', '/register'];
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    foreach ($urls as $path) {
+        $xml .= '<url><loc>'.htmlspecialchars(url($path)).'</loc></url>';
+    }
+
+    return response($xml.'</urlset>\n', 200, ['Content-Type' => 'application/xml']);
+});
+
 Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('card');
 
 // Member self-service portal (private portal_token link; no login needed).

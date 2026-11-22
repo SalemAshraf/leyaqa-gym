@@ -26,7 +26,9 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
 </script>
 
 <template>
-    <Head :title="t('landing_title')" />
+    <Head :title="t('landing_title')">
+        <meta name="description" :content="t('hero_sub')" />
+    </Head>
     <div class="min-h-screen bg-[#070D1A] text-white" :dir="isAr ? 'rtl' : 'ltr'">
         <header class="sticky top-0 z-20 border-b border-white/10 bg-[#070D1A]/85 backdrop-blur">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
