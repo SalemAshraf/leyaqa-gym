@@ -24,6 +24,7 @@ const groups = computed(() => {
     if (can('reports.view')) daily.push({ r: 'reports', k: 'reports', icon: 'reports' });
     if (can('checkins.manage')) daily.push({ r: 'checkins.index', k: 'checkins', icon: 'checkins', match: 'checkins.*' });
     if (can('members.manage')) daily.push({ r: 'members.index', k: 'members', icon: 'members', match: 'members.*' });
+    if (can('members.manage')) daily.push({ r: 'leads.index', k: 'leads', icon: 'leads', match: 'leads.*' });
     if (can('classes.manage')) daily.push({ r: 'classes.index', k: 'classes', icon: 'classes', match: 'classes.*' });
     if (daily.length) g.push({ k: 'g_daily', items: daily });
     const money = [];

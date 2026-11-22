@@ -31,6 +31,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('bookings/{booking}', [\App\Http\Controllers\ClassBookingController::class, 'destroy'])->name('bookings.destroy');
 
     Route::get('members/search', [MemberController::class, 'search'])->name('members.search');
+    Route::get('leads', [\App\Http\Controllers\LeadController::class, 'index'])->name('leads.index');
+    Route::post('leads', [\App\Http\Controllers\LeadController::class, 'store'])->name('leads.store');
+    Route::put('leads/{lead}', [\App\Http\Controllers\LeadController::class, 'update'])->name('leads.update');
+    Route::delete('leads/{lead}', [\App\Http\Controllers\LeadController::class, 'destroy'])->name('leads.destroy');
+    Route::post('leads/{lead}/convert', [\App\Http\Controllers\LeadController::class, 'convert'])->name('leads.convert');
     Route::resource('members', MemberController::class)->only(['index', 'store', 'show', 'update']);
     Route::resource('plans', PlanController::class)->only(['index', 'store', 'update']);
 
