@@ -65,7 +65,7 @@ const cards = [
                         <div class="border-b px-5 py-3 font-semibold text-gray-800">أعضاء عليهم مستحقات</div>
                         <div v-if="!debtors.length" class="px-5 py-6 text-sm text-gray-500">لا يوجد</div>
                         <ul v-else class="divide-y">
-                            <li v-for="row in debtors" :key="row.id" class="flex items-center justify-between px-5 py-3 text-sm">
+                            <li v-for="row in debtors" :key="row.member_id" class="flex items-center justify-between px-5 py-3 text-sm">
                                 <Link :href="route('members.show', row.member_id)" class="font-medium text-gray-900">{{ row.name }}</Link>
                                 <span class="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800">{{ row.balance.toLocaleString() }} {{ currency }}</span>
                             </li>

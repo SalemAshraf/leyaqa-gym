@@ -41,7 +41,7 @@ class DashboardController extends Controller
         $debtors = Member::with(['subscriptions.payments'])
             ->where('status', 'active')
             ->get()
-            ->map(fn (Member $m) => ['id' => $m->id, 'name' => $m->name, 'balance' => $m->outstandingBalance()])
+            ->map(fn (Member $m) => ['member_id' => $m->id, 'name' => $m->name, 'balance' => $m->outstandingBalance()])
             ->filter(fn ($row) => $row['balance'] > 0)
             ->sortByDesc('balance')
             ->take(10)
