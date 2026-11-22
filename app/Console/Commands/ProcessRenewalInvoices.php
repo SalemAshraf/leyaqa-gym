@@ -23,7 +23,10 @@ class ProcessRenewalInvoices extends Command
         $until = today()->addDays(7);
         $created = 0;
 
+        // Opt-in per gym: deploying the feature must never create
+        // receivables for a tenant that did not turn it on.
         Subscription::withoutGlobalScopes()
+            ->whereHas('gym', fn ($q) => $q->where('renewal_invoices_enabled', true))
             ->whereIn('status', ['active', 'frozen', 'expired'])
             ->whereNotNull('ends_at')
             ->where('price', '>', 0)

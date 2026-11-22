@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Pager from '@/Components/Pager.vue';
 import Badge from '@/Components/Badge.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
 const props = defineProps({ invoices: Object, status: String });
@@ -11,12 +12,18 @@ const currency = usePage().props.gym?.currency;
 
 const tones = { due: 'amber', collected: 'green', cancelled: 'slate' };
 const statusLabel = (s) => t('ri_' + s);
+const methods = ['cash', 'card', 'wallet', 'bank_transfer', 'other'];
+const methodLabel = (m) => t('m_' + m);
 
-function filter(s) {
-    router.get(route('renewal-invoices.index'), s ? { status: s } : {}, { preserveState: true });
+const openId = ref(null);
+const collectForm = ref({ amount: 0, method: 'cash' });
+function openCollect(i) {
+    openId.value = i.id;
+    collectForm.value = { amount: i.amount, method: 'cash' };
 }
 function collect(id) {
-    router.post(route('renewal-invoices.collect', id), {}, { preserveScroll: true });
+    router.post(route('renewal-invoices.collect', id), collectForm.value, { preserveScroll: true });
+    openId.value = null;
 }
 function cancel(id) {
     router.post(route('renewal-invoices.cancel', id), {}, { preserveScroll: true });
@@ -59,9 +66,16 @@ function cancel(id) {
                             <td class="td" :data-label="t('due_date')"><bdi dir="ltr">{{ i.due_date }}</bdi></td>
                             <td class="td" :data-label="t('status')"><Badge :tone="tones[i.status] || 'slate'">{{ statusLabel(i.status) }}</Badge></td>
                             <td class="td">
-                                <span v-if="i.status === 'due'" class="flex flex-wrap gap-2">
-                                    <button @click="collect(i.id)" class="btn-primary btn-sm">{{ t('ri_collect') }}</button>
+                                <span v-if="i.status === 'due' && openId !== i.id" class="flex flex-wrap gap-2">
+                                    <button @click="openCollect(i)" class="btn-primary btn-sm">{{ t('ri_collect') }}</button>
                                     <button @click="cancel(i.id)" class="btn-secondary btn-sm">{{ t('ri_cancel') }}</button>
+                                </span>
+                                <span v-else-if="i.status === 'due'" class="flex flex-wrap items-center gap-2">
+                                    <input v-model.number="collectForm.amount" type="number" min="0.01" step="0.01" class="input w-24" dir="ltr">
+                                    <select v-model="collectForm.method" class="input w-28">
+                                        <option v-for="m in methods" :key="m" :value="m">{{ methodLabel(m) }}</option>
+                                    </select>
+                                    <button @click="collect(i.id)" class="btn-primary btn-sm">{{ t('save') }}</button>
                                 </span>
                             </td>
                         </tr>

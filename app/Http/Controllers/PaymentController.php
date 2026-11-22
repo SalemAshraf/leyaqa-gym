@@ -49,6 +49,14 @@ class PaymentController extends Controller
         $subscription = Subscription::findOrFail($data['subscription_id']);
         abort_if($subscription->status === Subscription::STATUS_CANCELLED, 422, 'لا يمكن تسجيل دفعة على اشتراك ملغي');
 
+        // A cycle settled through its renewal invoice must not be collected
+        // again through the normal payment flow.
+        $settled = \App\Models\RenewalInvoice::withoutGlobalScopes()
+            ->where('subscription_id', $subscription->id)
+            ->where('status', 'collected')
+            ->exists();
+        abort_if($settled && $subscription->paidAmount() >= $subscription->price, 422, 'هذه الدورة محصلة بالفعل عبر فاتورة التجديد');
+
         Payment::create([
             'subscription_id' => $subscription->id,
             'amount' => $data['amount'],

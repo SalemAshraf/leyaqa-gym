@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\RenewalInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 /**
@@ -45,11 +46,21 @@ class RenewalInvoiceController extends Controller
         abort_unless($renewalInvoice->member?->accessibleBy($request->user()), 404);
         abort_unless($renewalInvoice->status === 'due', 422);
 
+        // Staff confirm the actual money received - never assumed cash.
+        $data = $request->validate([
+            'amount' => 'required|numeric|min:0.01|max:10000000',
+            'method' => ['required', Rule::in(Payment::METHODS)],
+        ]);
+
+        // One payment per invoice, even under double-submit races.
+        abort_if(Payment::withoutGlobalScopes()->where('renewal_invoice_id', $renewalInvoice->id)->exists(), 422);
+
         // gym_id comes from the BelongsToGym creating hook (authed staff).
         Payment::create([
             'subscription_id' => $renewalInvoice->subscription_id,
-            'amount' => $renewalInvoice->amount,
-            'method' => 'cash',
+            'renewal_invoice_id' => $renewalInvoice->id,
+            'amount' => $data['amount'],
+            'method' => $data['method'],
             'paid_at' => now(),
             'note' => 'renewal-invoice:'.$renewalInvoice->id,
             'created_by' => $request->user()->id,
@@ -58,6 +69,8 @@ class RenewalInvoiceController extends Controller
             'status' => 'collected',
             'collected_at' => now(),
             'created_by' => $request->user()->id,
+            'paid_amount' => $data['amount'],
+            'paid_method' => $data['method'],
         ]);
 
         return back()->with('success', 'تم تسجيل التحصيل');
@@ -69,7 +82,12 @@ class RenewalInvoiceController extends Controller
         abort_unless($renewalInvoice->member?->accessibleBy($request->user()), 404);
         abort_unless($renewalInvoice->status === 'due', 422);
 
-        $renewalInvoice->update(['status' => 'cancelled']);
+        // Cancel keeps the row (audit trail): who cancelled and when.
+        $renewalInvoice->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancelled_by' => $request->user()->id,
+        ]);
 
         return back()->with('success', 'تم إلغاء الفاتورة');
     }

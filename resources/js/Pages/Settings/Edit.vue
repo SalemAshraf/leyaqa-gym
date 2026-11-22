@@ -5,7 +5,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object, portal_link_days: Number });
+const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object, portal_link_days: Number, renewal_invoices_enabled: Boolean });
 const { t } = useI18n();
 
 const form = useForm({
@@ -29,6 +29,9 @@ function toggleAi() {
 
 const reminderDays = ref(props.reminders.days_before);
 const portalLinkDays = ref(props.portal_link_days);
+function toggleRenewalInvoices() {
+    router.patch(route('settings.renewal-invoices'), { enabled: !props.renewal_invoices_enabled }, { preserveScroll: true });
+}
 function savePortalLink() {
     router.patch(route('settings.portal-link'), { portal_link_days: portalLinkDays.value }, { preserveScroll: true });
 }
@@ -127,6 +130,18 @@ function disconnect(family) {
                     <label class="text-slate-600">{{ t('portal_link_days') }}</label>
                     <input v-model.number="portalLinkDays" type="number" min="0" max="365" class="input w-24" dir="ltr">
                     <button @click="savePortalLink" class="btn-secondary btn-sm">{{ t('save') }}</button>
+                </div>
+            </div>
+
+            <div class="card space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-ink-900">{{ t('ri_title') }}</div>
+                        <p class="text-sm text-slate-500">{{ t('ri_desc') }}</p>
+                    </div>
+                    <button @click="toggleRenewalInvoices" class="btn-sm whitespace-nowrap" :class="renewal_invoices_enabled ? 'btn-primary' : 'btn-secondary'">
+                        {{ renewal_invoices_enabled ? t('ai_on') : t('ai_off') }}
+                    </button>
                 </div>
             </div>
 

@@ -174,7 +174,7 @@ class SubscriptionController extends Controller
 
         $ends = $plan->isDuration() ? $starts->copy()->addDays($plan->duration_days - 1) : null;
 
-        Subscription::create([
+        $new = Subscription::create([
             'member_id' => $subscription->member_id,
             'plan_id' => $plan->id,
             'starts_at' => $starts->toDateString(),
@@ -183,6 +183,20 @@ class SubscriptionController extends Controller
             'sessions_remaining' => $plan->isSessions() ? $plan->sessions_count : null,
             'price' => $data['price'] ?? $plan->price,
         ]);
+
+        // Renewal-invoice linkage: the ending cycle's invoice (and any payment
+        // already collected against it) belongs to the new subscription, so
+        // the cycle can never be collected twice or counted as two receivables.
+        $invoice = \App\Models\RenewalInvoice::withoutGlobalScopes()
+            ->where('subscription_id', $subscription->id)
+            ->whereDate('due_date', $subscription->ends_at ?? today())
+            ->first();
+        if ($invoice) {
+            $invoice->update(['subscription_id' => $new->id]);
+            \App\Models\Payment::withoutGlobalScopes()
+                ->where('renewal_invoice_id', $invoice->id)
+                ->update(['subscription_id' => $new->id]);
+        }
 
         return back()->with('success', 'تم تجديد الاشتراك');
     }

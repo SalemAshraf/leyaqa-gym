@@ -37,6 +37,7 @@ class SettingsController extends Controller
                 'days_before' => (int) $gym->reminder_days_before,
             ],
             'portal_link_days' => (int) ($gym->portal_link_days ?? 90),
+            'renewal_invoices_enabled' => (bool) $gym->renewal_invoices_enabled,
         ]);
     }
 
@@ -69,6 +70,16 @@ class SettingsController extends Controller
             'reminders_enabled' => $data['enabled'],
             'reminder_days_before' => $data['days_before'],
         ])->save();
+
+        return back()->with('success', 'تم حفظ الإعدادات');
+    }
+
+    /** Opt-in: generate due renewal invoices for this gym. Off by default. */
+    public function renewalInvoicesToggle(Request $request)
+    {
+        abort_unless($request->user()->can('gym.manage'), 403);
+        $data = $request->validate(['enabled' => 'required|boolean']);
+        $request->user()->gym->forceFill(['renewal_invoices_enabled' => $data['enabled']])->save();
 
         return back()->with('success', 'تم حفظ الإعدادات');
     }

@@ -14,9 +14,9 @@ class RenewalInvoice extends Model
 {
     use BelongsToGym, HasFactory;
 
-    protected $fillable = ['gym_id', 'member_id', 'subscription_id', 'amount', 'status', 'due_date', 'collected_at', 'created_by'];
+    protected $fillable = ['gym_id', 'member_id', 'subscription_id', 'amount', 'status', 'due_date', 'collected_at', 'created_by', 'paid_amount', 'paid_method', 'cancelled_at', 'cancelled_by'];
 
-    protected $casts = ['due_date' => 'date', 'collected_at' => 'datetime', 'amount' => 'float'];
+    protected $casts = ['due_date' => 'date', 'collected_at' => 'datetime', 'cancelled_at' => 'datetime', 'amount' => 'float', 'paid_amount' => 'float'];
 
     public function member(): BelongsTo
     {

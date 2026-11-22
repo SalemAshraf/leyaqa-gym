@@ -13,7 +13,7 @@ class Payment extends Model
 
     public const METHODS = ['cash', 'card', 'wallet', 'bank_transfer', 'other'];
 
-    protected $fillable = ['subscription_id', 'amount', 'method', 'paid_at', 'note', 'created_by'];
+    protected $fillable = ['subscription_id', 'renewal_invoice_id', 'amount', 'method', 'paid_at', 'note', 'created_by'];
 
     protected $casts = [
         'amount' => 'decimal:2',
