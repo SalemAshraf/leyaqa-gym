@@ -10,7 +10,6 @@ const props = defineProps({
     balance: Number,
     upcoming: Array,
     days: Array,
-    token: String,
     card_url: String,
 });
 
@@ -19,7 +18,7 @@ const flash = computed(() => page.props.flash?.success);
 const errors = computed(() => page.props.errors || {});
 
 const ar = computed(() => (props.gym.locale || 'ar') === 'ar');
-const manifestUrl = computed(() => route('portal.manifest', props.token));
+const manifestUrl = computed(() => route('portal.manifest'));
 // Stored coach names often already include the title (كابتن أحمد) - don't double it.
 const coachName = (n) => (n || '').replace(/^(الكابتن|كابتن|captain|coach)\s+/i, '');
 const dir = computed(() => (ar.value ? 'rtl' : 'ltr'));
@@ -54,10 +53,10 @@ const bookingTones = { booked: 'green', waitlisted: 'amber' };
 const money = (n) => new Intl.NumberFormat(ar.value ? 'ar-EG' : 'en-US', { maximumFractionDigits: 2 }).format(n) + ' ' + (props.gym.currency || '');
 
 function book(cls, date) {
-    router.post(route('portal.bookings.store', props.token), { class_id: cls.id, class_date: date }, { preserveScroll: true });
+    router.post(route('portal.bookings.store'), { class_id: cls.id, class_date: date }, { preserveScroll: true });
 }
 function cancelBooking(id) {
-    router.delete(route('portal.bookings.destroy', { token: props.token, bookingId: id }), { preserveScroll: true });
+    router.delete(route('portal.bookings.destroy', { bookingId: id }), { preserveScroll: true });
 }
 </script>
 

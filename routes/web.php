@@ -126,10 +126,15 @@ Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('c
 
 // Member self-service portal (private portal_token link; no login needed).
 Route::middleware('private.headers')->group(function () {
-    Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'show'])->name('portal.show');
-    Route::get('my/{token}/manifest.webmanifest', [\App\Http\Controllers\MemberPortalController::class, 'manifest'])->name('portal.manifest');
-    Route::post('my/{token}/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
-    Route::delete('my/{token}/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
+    Route::get('my/expired', fn () => \Inertia\Inertia::render('MemberLinkExpired'))->name('portal.expired');
+    Route::middleware('portal.session')->group(function () {
+        Route::get('my', [\App\Http\Controllers\MemberPortalController::class, 'show'])->name('portal.show');
+        Route::get('my/manifest.webmanifest', [\App\Http\Controllers\MemberPortalController::class, 'manifest'])->name('portal.manifest');
+        Route::post('my/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
+        Route::delete('my/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
+    });
+    // Last: the {token} exchange must not shadow the literal routes above.
+    Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'exchange'])->name('portal.exchange');
 });
 
 require __DIR__.'/auth.php';

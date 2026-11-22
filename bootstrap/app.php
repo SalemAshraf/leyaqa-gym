@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform.admin' => \App\Http\Middleware\PlatformAdmin::class,
             'member.token' => \App\Http\Middleware\MemberTokenAuth::class,
             'private.headers' => \App\Http\Middleware\PrivateContentHeaders::class,
+            'portal.session' => \App\Http\Middleware\PortalSessionAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

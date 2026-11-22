@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Member;
+use App\Models\MemberPortalSession;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,12 +15,11 @@ class MemberTokenAuth
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->bearerToken();
-        $member = Member::findByPortalToken($token);
+        $session = MemberPortalSession::findValidByToken($request->bearerToken());
 
-        abort_unless($member, 401, 'Invalid member token');
+        abort_unless($session?->member, 401, 'Invalid member token');
 
-        $request->attributes->set('member', $member);
+        $request->attributes->set('member', $session->member);
 
         return $next($request);
     }

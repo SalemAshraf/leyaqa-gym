@@ -227,6 +227,6 @@ class MemberController extends Controller
 
         $plain = $member->rotatePortalToken();
 
-        return back()->with('portal_link', route('portal.show', $plain));
+        return back()->with('portal_link', route('portal.exchange', $plain));
     }
 }

@@ -116,7 +116,22 @@ class Member extends Model
             'portal_token_issued_at' => now(),
         ])->save();
 
+        // Rotation also revokes every live portal session of the member.
+        MemberPortalSession::withoutGlobalScopes()
+            ->where('member_id', $this->id)
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
+
         return $plain;
+    }
+
+    /**
+     * Consume the single-use bootstrap token: the stored hash is replaced by
+     * a hash of a token nobody knows, so the shared link cannot be replayed.
+     */
+    public function consumePortalToken(): void
+    {
+        $this->forceFill(['portal_token' => static::hashPortalToken((string) Str::uuid())])->save();
     }
 
     public function currentSubscription(): ?Subscription

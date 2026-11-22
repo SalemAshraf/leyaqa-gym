@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ClassBooking;
 use App\Models\GymClass;
 use App\Models\Member;
+use App\Models\MemberPortalSession;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
@@ -16,10 +18,35 @@ use Inertia\Inertia;
  */
 class MemberPortalController extends Controller
 {
-    public function show(string $token)
+    /**
+     * The staff-shared link: a single-use bootstrap token exchanged once for
+     * a bounded portal session (web cookie, 30 days). A consumed/expired link
+     * with no live session lands on the expired-link page.
+     */
+    public function exchange(Request $request, string $token)
     {
         $member = Member::findByPortalToken($token);
-        abort_unless($member, 404);
+
+        if (! $member) {
+            $existing = $request->session()->get('member_portal_session_id');
+            $existing = $existing ? MemberPortalSession::find($existing) : null;
+            if ($existing?->isValid()) {
+                return redirect()->route('portal.show');
+            }
+
+            return redirect()->route('portal.expired');
+        }
+
+        $member->consumePortalToken();
+        [$portalSession] = MemberPortalSession::mint($member, 'web');
+        $request->session()->put('member_portal_session_id', $portalSession->id);
+
+        return redirect()->route('portal.show');
+    }
+
+    public function show(Request $request)
+    {
+        $member = $request->attributes->get('member');
         $member->load('gym');
         $gym = $member->gym;
         $today = now($gym->timezone);
@@ -88,7 +115,6 @@ class MemberPortalController extends Controller
             'balance' => $member->outstandingBalance(),
             'upcoming' => $upcoming,
             'days' => $days,
-            'token' => $token,
             'card_url' => route('card', $member->qr_token),
         ]);
     }
@@ -97,16 +123,15 @@ class MemberPortalController extends Controller
      * Web app manifest per member: "add to home screen" opens their portal
      * directly (app-like install without a store listing).
      */
-    public function manifest(string $token): JsonResponse
+    public function manifest(Request $request): JsonResponse
     {
-        $member = Member::findByPortalToken($token);
-        abort_unless($member, 404);
+        $member = $request->attributes->get('member');
 
         return response()->json([
             'name' => $member->gym->name.' - '.$member->name,
             'short_name' => $member->gym->name,
-            'start_url' => route('portal.show', $token),
-            'scope' => route('portal.show', $token),
+            'start_url' => route('portal.show'),
+            'scope' => route('portal.show'),
             'display' => 'standalone',
             'dir' => $member->gym->locale === 'ar' ? 'rtl' : 'ltr',
             'background_color' => '#0a0a0a',

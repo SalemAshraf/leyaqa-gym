@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassBooking;
 use App\Models\GymClass;
 use App\Models\Member;
+use App\Models\MemberPortalSession;
 use App\Support\ClassBookingManager;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -13,6 +14,27 @@ use Illuminate\Http\Request;
 
 class MemberApiController extends Controller
 {
+    /**
+     * Exchange the single-use bootstrap token (from the staff-shared link)
+     * for a bounded API session token (30 days). One replay is impossible:
+     * the bootstrap is consumed at exchange.
+     */
+    public function createSession(Request $request): JsonResponse
+    {
+        $data = $request->validate(['token' => 'required|string|max:200']);
+
+        $member = Member::findByPortalToken($data['token']);
+        abort_unless($member, 401, 'Invalid member token');
+
+        $member->consumePortalToken();
+        [$session, $plain] = MemberPortalSession::mint($member, 'api');
+
+        return response()->json([
+            'token' => $plain,
+            'expires_at' => $session->expires_at->toIso8601String(),
+        ], 201);
+    }
+
     public function profile(Request $request): JsonResponse
     {
         $member = $request->attributes->get('member');
