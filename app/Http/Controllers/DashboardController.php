@@ -113,6 +113,32 @@ class DashboardController extends Controller
             'planMix' => $planMix,
             'recentCheckIns' => $recentCheckIns,
             'currency' => $gym->currency,
+            'setup' => $this->setupSteps($gym),
         ]);
+    }
+
+    /** First-run setup guide: real state per step, null once finished or dismissed. */
+    private function setupSteps(\App\Models\Gym $gym): ?array
+    {
+        if ($gym->setup_dismissed_at) {
+            return null;
+        }
+
+        $steps = [
+            ['key' => 'settings', 'route' => 'settings.edit', 'done' => ! empty($gym->phone)],
+            ['key' => 'plan', 'route' => 'plans.index', 'done' => \App\Models\Plan::count() > 0],
+            ['key' => 'member', 'route' => 'members.index', 'done' => Member::count() > 0],
+            ['key' => 'subscription', 'route' => 'subscriptions.index', 'done' => Subscription::count() > 0],
+            ['key' => 'checkin', 'route' => 'checkins.index', 'done' => CheckIn::count() > 0],
+            ['key' => 'staff', 'route' => 'staff.index', 'done' => $gym->users()->count() > 1],
+        ];
+
+        $doneCount = collect($steps)->where('done', true)->count();
+
+        if ($doneCount === count($steps)) {
+            return null;
+        }
+
+        return ['steps' => $steps, 'done' => $doneCount, 'total' => count($steps)];
     }
 }

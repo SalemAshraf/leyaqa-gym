@@ -67,3 +67,25 @@ it('counts gym-local-day check-ins stored across the UTC day boundary', function
         )
     );
 });
+
+it('guides first-run setup and disappears when done or dismissed', function () {
+    [$gym, $owner] = makeOwner();
+
+    // Fresh gym: guide visible with no steps done.
+    $this->actingAs($owner)->get('/dashboard')->assertInertia(
+        fn ($page) => $page->where('setup.done', 0)->where('setup.total', 6)->where('setup.steps.0.done', false)
+    );
+
+    // Completing real state flips steps.
+    $gym->update(['phone' => '01000000000']);
+    \App\Models\Plan::factory()->create(['gym_id' => $gym->id]);
+    $this->actingAs($owner->fresh())->get('/dashboard')->assertInertia(
+        fn ($page) => $page->where('setup.done', 2)->where('setup.steps.0.done', true)->where('setup.steps.1.done', true)
+    );
+
+    // Dismissal hides it even while steps remain.
+    $this->actingAs($owner)->post('/setup/dismiss')->assertSessionHasNoErrors();
+    $this->actingAs($owner->fresh())->get('/dashboard')->assertInertia(
+        fn ($page) => $page->where('setup', null)
+    );
+});

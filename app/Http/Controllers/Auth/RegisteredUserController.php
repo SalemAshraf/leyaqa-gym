@@ -41,12 +41,17 @@ class RegisteredUserController extends Controller
         $user = DB::transaction(function () use ($request, $currencies, $timezones) {
             Permissions::sync();
 
+            $trialDays = config('platform.trial_days');
+
             $gym = Gym::create([
                 'name' => $request->gym_name,
                 'country' => $request->country,
                 'currency' => $currencies[$request->country],
                 'timezone' => $timezones[$request->country],
                 'locale' => 'ar',
+                // Trial only exists once the product owner configures its length.
+                'platform_status' => $trialDays ? 'trialing' : 'active',
+                'trial_ends_at' => $trialDays ? \Carbon\Carbon::today($timezones[$request->country])->addDays($trialDays) : null,
             ]);
 
             $user = User::create([

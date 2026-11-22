@@ -17,6 +17,7 @@ class GymFactory extends Factory
             'currency' => 'EGP',
             'timezone' => 'Africa/Cairo',
             'locale' => 'ar',
+            'platform_status' => 'active',
         ];
     }
 }

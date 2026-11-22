@@ -30,6 +30,11 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'gym' => $user?->gym?->only(['name', 'currency', 'locale', 'timezone']),
+            'platform' => $user ? [
+                'status' => $user->gym?->platform_status,
+                'trial_days_left' => $user->gym?->trialDaysLeft(),
+                'is_admin' => in_array($user->email, config('platform.admin_emails', []), true),
+            ] : null,
             'locale' => $user?->locale ?? $request->session()->get('locale') ?? $user?->gym?->locale ?? 'ar',
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

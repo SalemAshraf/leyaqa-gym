@@ -11,16 +11,29 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect()->route('dashboard');
-    }
-
-    return Inertia\Inertia::render('Welcome', ['canRegister' => true]);
-})->name('welcome');
+Route::get('/', \App\Http\Controllers\LandingController::class)->name('welcome');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Billing stays reachable even when the platform subscription lapses.
+    Route::get('billing', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+    Route::post('billing/subscribe', [\App\Http\Controllers\BillingController::class, 'subscribe'])->name('billing.subscribe');
+});
+
+Route::middleware(['auth', 'platform.admin'])->prefix('platform')->name('platform.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PlatformAdminController::class, 'index'])->name('index');
+    Route::get('/gyms/{gym}', [\App\Http\Controllers\PlatformAdminController::class, 'show'])->name('gyms.show');
+    Route::post('/invoices/{invoice}/paid', [\App\Http\Controllers\PlatformAdminController::class, 'markPaid'])->name('invoices.paid');
+    Route::post('/gyms/{gym}/extend-trial', [\App\Http\Controllers\PlatformAdminController::class, 'extendTrial'])->name('gyms.extend-trial');
+    Route::post('/gyms/{gym}/status', [\App\Http\Controllers\PlatformAdminController::class, 'setStatus'])->name('gyms.status');
+});
+
+Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::post('/setup/dismiss', function () {
+        auth()->user()->gym->update(['setup_dismissed_at' => now()]);
+
+        return back();
+    })->name('setup.dismiss');
     Route::get('reports', \App\Http\Controllers\ReportsController::class)->name('reports');
 
     Route::get('classes', [\App\Http\Controllers\ClassController::class, 'index'])->name('classes.index');

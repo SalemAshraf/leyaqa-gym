@@ -5,7 +5,7 @@ import Icon from '@/Components/Icon.vue';
 import { useI18n } from '@/lib/i18n';
 
 const page = usePage();
-const { t, locale } = useI18n();
+const { t, locale, num } = useI18n();
 watchEffect(() => {
     const l = page.props.locale || 'ar';
     document.documentElement.lang = l;
@@ -42,6 +42,10 @@ const active = (n) => route().current(n.match || n.r);
 const q = ref('');
 const goSearch = () => router.get(route('members.index'), { search: q.value || undefined });
 const flash = computed(() => page.props.flash?.success);
+const trialBanner = computed(() => {
+    const p = page.props.platform;
+    return p?.status === 'trialing' && p.trial_days_left <= 7 ? p.trial_days_left : null;
+});
 const initials = computed(() => (user.value.name || '?').trim().split(/\s+/).slice(0, 2).map((x) => x[0]).join('').toUpperCase());
 const toggleLocale = () => router.post(route('locale'), { locale: locale.value === 'ar' ? 'en' : 'ar' }, { preserveScroll: true, preserveState: true });
 </script>
@@ -89,6 +93,10 @@ const toggleLocale = () => router.post(route('locale'), { locale: locale.value =
                     <Link :href="route('logout')" method="post" as="button" class="btn-secondary btn-sm gap-1.5" :aria-label="t('logout')"><Icon name="logout" :size="15" class="rtl:-scale-x-100" /><span class="hidden xl:inline">{{ t('logout') }}</span></Link>
                 </div>
             </header>
+            <p v-if="trialBanner !== null" class="mx-4 mt-4 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 lg:mx-8">
+                {{ t('trial_banner').replace('{d}', num(trialBanner)) }}
+                <a :href="route('billing.show')" class="font-bold underline">{{ t('trial_banner_cta') }}</a>
+            </p>
             <p v-if="flash" class="mx-4 mt-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm text-brand-800 lg:mx-8">{{ flash }}</p>
             <div v-if="$page.props.errors && Object.keys($page.props.errors).length" class="mx-4 mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800 lg:mx-8">
                 <div v-for="(error, key) in $page.props.errors" :key="key">{{ error }}</div>

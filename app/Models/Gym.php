@@ -10,7 +10,30 @@ class Gym extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'country', 'currency', 'timezone', 'locale'];
+    protected $fillable = ['name', 'phone', 'country', 'currency', 'timezone', 'locale', 'platform_plan_id', 'platform_status', 'trial_ends_at', 'platform_renews_at', 'setup_dismissed_at'];
+
+    protected $casts = ['trial_ends_at' => 'date', 'platform_renews_at' => 'date', 'setup_dismissed_at' => 'datetime'];
+
+    /** Days left in the free trial (0 when expired or not trialing). */
+    public function trialDaysLeft(): int
+    {
+        if ($this->platform_status !== 'trialing' || ! $this->trial_ends_at) {
+            return 0;
+        }
+
+        return max(0, (int) now($this->timezone ?: 'UTC')->startOfDay()->diffInDays($this->trial_ends_at, false));
+    }
+
+    /** Whether the gym may use the app (trial running, paid, or inside grace). */
+    public function platformAccessible(): bool
+    {
+        return match ($this->platform_status) {
+            'trialing' => $this->trialDaysLeft() > 0,
+            'active' => ! $this->platform_renews_at
+                || now($this->timezone ?: 'UTC')->startOfDay()->lte($this->platform_renews_at->copy()->addDays((int) config('platform.grace_days', 7))),
+            default => false,
+        };
+    }
 
     public function users(): HasMany
     {
@@ -30,5 +53,15 @@ class Gym extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function platformInvoices(): HasMany
+    {
+        return $this->hasMany(PlatformInvoice::class);
+    }
+
+    public function platformPlan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(PlatformPlan::class, 'platform_plan_id');
     }
 }
