@@ -62,10 +62,13 @@ it('decrements session packs on entry and denies when empty', function () {
     );
 
     $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
+    \Carbon\Carbon::setTestNow(now()->addMinutes(3));
     $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
     expect($sub->refresh()->sessions_remaining)->toBe(0);
 
+    \Carbon\Carbon::setTestNow(now()->addMinutes(3));
     $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
+    \Carbon\Carbon::setTestNow();
     expect(CheckIn::latest('id')->first()->denial_reason)->toBe('no_sessions_left');
 });
 
@@ -84,4 +87,35 @@ it('lets a member with unpaid balance in, and reports the debt', function () {
 
     expect(CheckIn::first()->result)->toBe('allowed')
         ->and(session('checkin')['balance'])->toBe(800.0);
+});
+
+it('does not double-decrement a session pack on a double scan within two minutes', function () {
+    [$gym, $owner, $member, $plan, $sub] = gymWithMember(
+        ['type' => 'sessions', 'duration_days' => null, 'sessions_count' => 5],
+        ['ends_at' => null, 'sessions_remaining' => 5],
+    );
+
+    $this->actingAs($owner)->post('/check-in', ['qr_token' => $member->qr_token]);
+    $this->actingAs($owner)->post('/check-in', ['qr_token' => $member->qr_token]);
+    $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
+
+    expect($sub->refresh()->sessions_remaining)->toBe(4)
+        ->and(CheckIn::count())->toBe(1)
+        ->and(session('checkin')['duplicate'] ?? false)->toBeTrue();
+});
+
+it('counts a later visit as a new check-in after the guard window', function () {
+    [$gym, $owner, $member, $plan, $sub] = gymWithMember(
+        ['type' => 'sessions', 'duration_days' => null, 'sessions_count' => 5],
+        ['ends_at' => null, 'sessions_remaining' => 5],
+    );
+
+    $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
+
+    \Carbon\Carbon::setTestNow(now()->addMinutes(3));
+    $this->actingAs($owner)->post('/check-in', ['member_id' => $member->id]);
+    \Carbon\Carbon::setTestNow();
+
+    expect($sub->refresh()->sessions_remaining)->toBe(3)
+        ->and(CheckIn::count())->toBe(2);
 });

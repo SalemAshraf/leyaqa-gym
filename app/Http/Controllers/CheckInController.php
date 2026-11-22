@@ -53,6 +53,27 @@ class CheckInController extends Controller
         abort_if($member->status !== 'active', 422, 'العضو غير نشط');
 
         $result = DB::transaction(function () use ($member, $data) {
+            // Double-scan guard: a second scan of the same member within 2 minutes
+            // returns the original result without a new record or session decrement.
+            $recent = CheckIn::where('member_id', $member->id)
+                ->where('checked_in_at', '>=', now()->subMinutes(2))
+                ->latest('checked_in_at')
+                ->first();
+
+            if ($recent) {
+                $subscription = $member->currentSubscription();
+
+                return [
+                    'allowed' => $recent->result === 'allowed',
+                    'reason' => $recent->denial_reason,
+                    'member' => $member->name,
+                    'balance' => $member->outstandingBalance(),
+                    'days_left' => $subscription?->daysLeft(),
+                    'sessions_remaining' => $subscription?->sessions_remaining,
+                    'duplicate' => true,
+                ];
+            }
+
             $subscription = $member->currentSubscription();
             [$allowed, $reason] = $subscription
                 ? $subscription->canEnter()
