@@ -1,76 +1,99 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Kpi from '@/Components/Kpi.vue';
+import TrendChart from '@/Components/TrendChart.vue';
+import BarList from '@/Components/BarList.vue';
+import Badge from '@/Components/Badge.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from '@/lib/i18n';
 
 const props = defineProps({
     stats: Object,
     expiringSoon: Array,
     debtors: Array,
+    revenueTrend: Array,
+    checkinsByHour: Array,
+    planMix: Array,
+    recentCheckIns: Array,
     currency: String,
 });
 
-const cards = [
-    { key: 'members', label: 'الأعضاء النشطون' },
-    { key: 'active_subscriptions', label: 'اشتراكات سارية' },
-    { key: 'checkins_today', label: 'حضور اليوم' },
-    { key: 'denied_today', label: 'مرفوض اليوم' },
-];
+const { t, money, num, date } = useI18n();
+const revenueSeries = props.revenueTrend.map((r) => r.revenue);
 </script>
 
 <template>
-    <Head title="الرئيسية" />
+    <Head :title="t('dashboard')" />
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold text-gray-800">الرئيسية</h2>
-        </template>
+        <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                <Kpi :label="t('kpi_members')" :value="num(stats.members)" />
+                <Kpi :label="t('kpi_subs')" :value="num(stats.active_subscriptions)" />
+                <Kpi :label="t('kpi_in_today')" :value="num(stats.checkins_today)" tone="good" />
+                <Kpi :label="t('kpi_denied')" :value="num(stats.denied_today)" :tone="stats.denied_today > 0 ? 'bad' : 'slate'" />
+            </div>
 
-        <div class="py-8">
-            <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                    <div v-for="card in cards" :key="card.key" class="rounded-lg bg-white p-5 shadow-sm">
-                        <div class="text-sm text-gray-500">{{ card.label }}</div>
-                        <div class="mt-1 text-3xl font-bold text-gray-900">{{ stats[card.key] }}</div>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div class="card lg:col-span-2">
+                    <div class="mb-4 flex items-baseline justify-between">
+                        <h3 class="font-bold text-ink-900">{{ t('revenue_trend') }}</h3>
+                        <span class="text-lg font-bold text-brand-700">{{ money(stats.revenue_month, currency) }}</span>
+                    </div>
+                    <TrendChart :rows="revenueTrend" value-key="revenue" :format="(v) => money(v, currency)" />
+                </div>
+                <div class="card">
+                    <h3 class="mb-4 font-bold text-ink-900">{{ t('plan_mix') }}</h3>
+                    <BarList v-if="planMix.length" :rows="planMix" :format="num" />
+                    <p v-else class="py-6 text-sm text-slate-400">{{ t('no_data') }}</p>
+                    <div class="mt-4 border-t border-slate-100 pt-3 text-sm text-slate-500">
+                        {{ t('kpi_outstanding') }}: <bdi class="font-bold text-rose-600">{{ money(stats.outstanding_total, currency) }}</bdi>
                     </div>
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <div class="rounded-lg bg-white p-5 shadow-sm">
-                        <div class="text-sm text-gray-500">إيراد هذا الشهر</div>
-                        <div class="mt-1 text-3xl font-bold text-emerald-700">{{ stats.revenue_month.toLocaleString() }} {{ currency }}</div>
-                    </div>
-                    <div class="rounded-lg bg-white p-5 shadow-sm">
-                        <div class="text-sm text-gray-500">مستحقات لم تُدفع</div>
-                        <div class="mt-1 text-3xl font-bold text-red-600">{{ stats.outstanding_total.toLocaleString() }} {{ currency }}</div>
-                    </div>
+            <div class="card">
+                <h3 class="mb-4 font-bold text-ink-900">{{ t('attendance_today') }}</h3>
+                <TrendChart :rows="checkinsByHour" value-key="count" :format="num" />
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div class="card !p-0 overflow-hidden">
+                    <div class="border-b border-slate-100 px-5 py-3 font-bold text-ink-900">{{ t('expiring_soon') }}</div>
+                    <p v-if="!expiringSoon.length" class="px-5 py-6 text-sm text-slate-400">{{ t('no_data') }}</p>
+                    <ul v-else class="divide-y divide-slate-100">
+                        <li v-for="row in expiringSoon" :key="row.id" class="flex items-center justify-between gap-2 px-5 py-3 text-sm">
+                            <div class="min-w-0">
+                                <Link :href="route('members.show', row.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ row.member }}</Link>
+                                <span class="truncate text-slate-500"> · {{ row.plan }}</span>
+                            </div>
+                            <Badge tone="amber">{{ row.days_left === 0 ? t('ends_today') : t('days_left').replace('{n}', num(row.days_left)) }}</Badge>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div class="rounded-lg bg-white shadow-sm">
-                        <div class="border-b px-5 py-3 font-semibold text-gray-800">اشتراكات تنتهي خلال ٧ أيام</div>
-                        <div v-if="!expiringSoon.length" class="px-5 py-6 text-sm text-gray-500">لا يوجد</div>
-                        <ul v-else class="divide-y">
-                            <li v-for="row in expiringSoon" :key="row.id" class="flex items-center justify-between px-5 py-3 text-sm">
-                                <div>
-                                    <Link :href="route('members.show', row.member_id)" class="font-medium text-gray-900">{{ row.member }}</Link>
-                                    <span class="text-gray-500"> · {{ row.plan }}</span>
-                                </div>
-                                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-800">
-                                    {{ row.days_left === 0 ? 'ينتهي اليوم' : `باقي ${row.days_left} يوم` }}
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="card !p-0 overflow-hidden">
+                    <div class="border-b border-slate-100 px-5 py-3 font-bold text-ink-900">{{ t('top_debtors') }}</div>
+                    <p v-if="!debtors.length" class="px-5 py-6 text-sm text-slate-400">{{ t('no_data') }}</p>
+                    <ul v-else class="divide-y divide-slate-100">
+                        <li v-for="row in debtors" :key="row.member_id" class="flex items-center justify-between gap-2 px-5 py-3 text-sm">
+                            <Link :href="route('members.show', row.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ row.name }}</Link>
+                            <Badge tone="rose">{{ money(row.balance, currency) }}</Badge>
+                        </li>
+                    </ul>
+                </div>
 
-                    <div class="rounded-lg bg-white shadow-sm">
-                        <div class="border-b px-5 py-3 font-semibold text-gray-800">أعضاء عليهم مستحقات</div>
-                        <div v-if="!debtors.length" class="px-5 py-6 text-sm text-gray-500">لا يوجد</div>
-                        <ul v-else class="divide-y">
-                            <li v-for="row in debtors" :key="row.member_id" class="flex items-center justify-between px-5 py-3 text-sm">
-                                <Link :href="route('members.show', row.member_id)" class="font-medium text-gray-900">{{ row.name }}</Link>
-                                <span class="rounded-full bg-red-100 px-2 py-1 text-xs text-red-800">{{ row.balance.toLocaleString() }} {{ currency }}</span>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="card !p-0 overflow-hidden">
+                    <div class="border-b border-slate-100 px-5 py-3 font-bold text-ink-900">{{ t('recent_checkins') }}</div>
+                    <p v-if="!recentCheckIns.length" class="px-5 py-6 text-sm text-slate-400">{{ t('no_data') }}</p>
+                    <ul v-else class="divide-y divide-slate-100">
+                        <li v-for="(c, i) in recentCheckIns" :key="i" class="flex items-center justify-between gap-2 px-5 py-3 text-sm">
+                            <Link :href="route('members.show', c.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ c.member }}</Link>
+                            <span class="flex items-center gap-2">
+                                <span class="text-xs text-slate-400">{{ date(c.checked_in_at, true) }}</span>
+                                <Badge :tone="c.result === 'allowed' ? 'green' : 'rose'">{{ c.result === 'allowed' ? t('entered') : t('denied') }}</Badge>
+                            </span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

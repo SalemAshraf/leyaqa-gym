@@ -6,14 +6,11 @@
 
         <title inertia>{{ config('app.name', 'Leyaqa') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=cairo:400,500,600,700&display=swap" rel="stylesheet" />
-
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
     </head>
-    <body class="antialiased" style="font-family: 'Cairo', sans-serif;">
+    <body class="antialiased">
         @inertia
     </body>
 </html>

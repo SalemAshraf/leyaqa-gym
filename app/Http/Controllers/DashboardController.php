@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\Payment;
 use App\Models\Subscription;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -47,17 +48,66 @@ class DashboardController extends Controller
             ->take(10)
             ->values();
 
+        // Revenue of the last 6 calendar months (gym timezone), grouped in PHP
+        // so the query stays identical on SQLite and MySQL.
+        $trendStart = $today->copy()->startOfMonth()->subMonths(5);
+        $payments6m = Payment::where('paid_at', '>=', $trendStart)->get(['amount', 'paid_at']);
+        $revenueTrend = collect(CarbonPeriod::create($trendStart, '1 month', $today->copy()->startOfMonth()))
+            ->map(function (Carbon $monthStart) use ($payments6m, $gym) {
+                $key = $monthStart->format('Y-m');
+                $sum = $payments6m
+                    ->filter(fn (Payment $p) => $p->paid_at->copy()->setTimezone($gym->timezone)->format('Y-m') === $key)
+                    ->sum('amount');
+
+                return ['month' => $key, 'revenue' => round((float) $sum, 2)];
+            })->values();
+
+        // Today's allowed check-ins grouped by hour (gym timezone).
+        $todayCheckIns = CheckIn::whereDate('checked_in_at', $today->toDateString())
+            ->where('result', 'allowed')
+            ->get(['checked_in_at']);
+        $byHour = $todayCheckIns
+            ->groupBy(fn (CheckIn $c) => $c->checked_in_at->copy()->setTimezone($gym->timezone)->format('H'))
+            ->map->count();
+        $checkinsByHour = collect(range(0, 23))
+            ->map(fn (int $h) => ['hour' => str_pad((string) $h, 2, '0', STR_PAD_LEFT), 'count' => (int) ($byHour[sprintf('%02d', $h)] ?? 0)])
+            ->values();
+
+        // Active subscriptions per plan name.
+        $planMix = $activeSubscriptions
+            ->groupBy(fn (Subscription $s) => $s->plan->name)
+            ->map(fn ($group, $name) => ['label' => $name, 'value' => $group->count()])
+            ->sortByDesc('value')
+            ->take(6)
+            ->values();
+
+        $recentCheckIns = CheckIn::with('member')
+            ->latest('checked_in_at')
+            ->limit(8)
+            ->get()
+            ->map(fn (CheckIn $c) => [
+                'member_id' => $c->member->id,
+                'member' => $c->member->name,
+                'result' => $c->result,
+                'reason' => $c->denial_reason,
+                'checked_in_at' => $c->checked_in_at->copy()->setTimezone($gym->timezone)->toDateTimeString(),
+            ]);
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'members' => Member::where('status', 'active')->count(),
                 'active_subscriptions' => $activeSubscriptions->count(),
-                'checkins_today' => CheckIn::whereDate('checked_in_at', $today->toDateString())->where('result', 'allowed')->count(),
+                'checkins_today' => $todayCheckIns->count(),
                 'denied_today' => CheckIn::whereDate('checked_in_at', $today->toDateString())->where('result', 'denied')->count(),
                 'revenue_month' => (float) Payment::whereBetween('paid_at', [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()->endOfDay()])->sum('amount'),
                 'outstanding_total' => round($debtors->sum('balance'), 2),
             ],
             'expiringSoon' => $expiringSoon,
             'debtors' => $debtors,
+            'revenueTrend' => $revenueTrend,
+            'checkinsByHour' => $checkinsByHour,
+            'planMix' => $planMix,
+            'recentCheckIns' => $recentCheckIns,
             'currency' => $gym->currency,
         ]);
     }

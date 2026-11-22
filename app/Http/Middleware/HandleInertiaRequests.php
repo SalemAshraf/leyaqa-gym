@@ -30,6 +30,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'gym' => $user?->gym?->only(['name', 'currency', 'locale', 'timezone']),
+            'locale' => $user?->locale ?? $request->session()->get('locale') ?? $user?->gym?->locale ?? 'ar',
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'checkin' => fn () => $request->session()->get('checkin'),

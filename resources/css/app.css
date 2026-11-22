@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    h1 { @apply tracking-tight text-slate-900; }
+    ::selection { background: #a7f3d0; }
+    html { font-family: 'Cairo', 'Segoe UI', Tahoma, system-ui, sans-serif; line-height: 1.65; }
+    body { font-feature-settings: 'tnum' 1; }
+}
+
+@layer components {
+    .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1 disabled:opacity-50; }
+    .btn-primary { @apply btn bg-brand-400 text-ink-900 shadow-[0_1px_0_rgba(11,22,17,0.15)] hover:bg-brand-300; }
+    .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-100; }
+    .btn-danger { @apply btn bg-rose-600 text-white hover:bg-rose-700; }
+    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .input { @apply block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-brand-600 focus:ring-brand-500; }
+    input[type='date'].input, input[type='datetime-local'].input { @apply min-w-[11rem] px-2 text-[13px]; font-variant-numeric: tabular-nums; }
+    .label { @apply mb-1 block text-sm font-medium text-slate-700; }
+    .card { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]; }
+    .th { @apply px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-500; }
+    .td { @apply px-4 py-3 text-sm; }
+}
+
+@media (max-width: 640px) {
+    table.stack thead { display: none; }
+    table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: 100%; }
+    table.stack tr { padding: 0.5rem 0.25rem; border-bottom: 1px solid #e2e8f0; }
+    table.stack td { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 0.75rem; text-align: end; }
+    table.stack td::before { content: attr(data-label); color: #64748b; font-size: 0.75rem; text-align: start; flex-shrink: 0; }
+    table.stack td[data-label=""]::before { display: none; }
+}
+
+* { scrollbar-width: thin; scrollbar-color: #9AA894 transparent; }
+@supports selector(::-webkit-scrollbar) {
+    * { scrollbar-width: auto; scrollbar-color: auto; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #B4BFAE; border-radius: 99px; border: 2px solid transparent; background-clip: content-box; min-height: 40px; min-width: 40px; }
+    ::-webkit-scrollbar-thumb:hover { background: #7E8F77; background-clip: content-box; }
+    ::-webkit-scrollbar-thumb:active { background: #4D5F47; background-clip: content-box; }
+    ::-webkit-scrollbar-corner { background: transparent; }
+}

@@ -1,22 +1,31 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { watchEffect } from 'vue';
+import { useI18n } from '@/lib/i18n';
+
+const page = usePage();
+const { t, locale } = useI18n();
+watchEffect(() => {
+    const l = page.props.locale || 'ar';
+    document.documentElement.lang = l;
+    document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+});
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
-    >
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
+    <div class="min-h-screen bg-canvas lg:flex">
+        <div class="flex min-h-screen flex-1 flex-col items-center justify-center p-6">
+            <Link href="/" class="mb-6 flex items-center gap-3 text-2xl font-bold text-ink-900">
+                <img src="/icon.svg" alt="" class="h-11 w-11 rounded-xl shadow" />{{ t('app') }}
             </Link>
+            <div class="card w-full max-w-md">
+                <slot />
+            </div>
         </div>
-
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
-            <slot />
+        <div class="hidden w-[42%] flex-col justify-center bg-ink-900 p-12 text-brand-50 lg:flex">
+            <img src="/icon.svg" alt="" class="mb-8 h-16 w-16 rounded-2xl shadow-lg" />
+            <h2 class="text-3xl font-bold leading-snug text-white">{{ t('au_side_h') }}</h2>
+            <p class="mt-4 max-w-md text-lg leading-relaxed text-slate-300">{{ t('au_side_p') }}</p>
         </div>
     </div>
 </template>

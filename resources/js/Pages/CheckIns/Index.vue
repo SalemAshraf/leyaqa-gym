@@ -1,18 +1,22 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Badge from '@/Components/Badge.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from '@/lib/i18n';
 
 const props = defineProps({ today: Array });
 const page = usePage();
+const { t, num, money, date } = useI18n();
 const result = computed(() => page.props.flash?.checkin);
+const currency = computed(() => page.props.gym?.currency);
 
 const form = useForm({ qr_token: '', member_id: '' });
 const input = ref('');
 
 const reasonLabel = (r) => ({
-    expired: 'الاشتراك منتهي', frozen: 'الاشتراك مجمّد', cancelled: 'الاشتراك ملغي',
-    no_sessions_left: 'الحصص خلصت', no_subscription: 'لا يوجد اشتراك', upcoming: 'الاشتراك لم يبدأ',
+    expired: t('reason_expired'), frozen: t('reason_frozen'), cancelled: t('reason_cancelled'),
+    no_sessions_left: t('reason_no_sessions'), no_subscription: t('reason_no_sub'), upcoming: t('reason_upcoming'),
 }[r] ?? r);
 
 function submit() {
@@ -32,49 +36,46 @@ function submit() {
 </script>
 
 <template>
-    <Head title="تسجيل الحضور" />
+    <Head :title="t('checkins')" />
     <AuthenticatedLayout>
-        <template #header><h2 class="text-xl font-semibold text-gray-800">تسجيل الحضور</h2></template>
-        <div class="py-8">
-            <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <form @submit.prevent="submit" class="rounded-lg bg-white p-6 shadow-sm">
-                    <label class="block text-sm font-medium text-gray-700">امسح QR أو اكتب رقم العضو</label>
-                    <input
-                        v-model="input" autofocus dir="ltr"
-                        class="mt-2 w-full rounded-md border-gray-300 text-center text-2xl tracking-widest"
-                        placeholder="QR / #"
-                        @keyup.enter="submit"
-                    />
-                    <button type="submit" class="mt-4 w-full rounded-md bg-emerald-600 py-3 text-lg font-medium text-white">تسجيل دخول</button>
-                </form>
+        <div class="mx-auto max-w-3xl space-y-6">
+            <form @submit.prevent="submit" class="card">
+                <label class="label">{{ t('scan_hint') }}</label>
+                <input
+                    v-model="input" autofocus dir="ltr"
+                    class="input mt-2 text-center text-2xl tracking-widest"
+                    placeholder="QR / #"
+                    @keyup.enter="submit"
+                />
+                <button type="submit" class="btn-primary mt-4 w-full !py-3 text-lg">{{ t('record_checkin') }}</button>
+            </form>
 
-                <div v-if="result" class="rounded-lg p-5 text-center shadow-sm" :class="result.allowed ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
-                    <div class="text-2xl font-bold">{{ result.allowed ? 'أهلًا ' + result.member : 'ممنوع الدخول' }}</div>
-                    <div v-if="!result.allowed" class="mt-1">{{ reasonLabel(result.reason) }}</div>
-                    <div v-if="result.allowed && result.balance > 0" class="mt-1 text-sm">عليه مستحقات: {{ result.balance.toLocaleString() }}</div>
-                    <div v-if="result.allowed && result.days_left !== null && result.days_left <= 7" class="mt-1 text-sm">
-                        اشتراكه ينتهي بعد {{ result.days_left }} يوم
-                    </div>
-                    <div v-if="result.allowed && result.sessions_remaining !== null" class="mt-1 text-sm">
-                        باقي {{ result.sessions_remaining }} حصة
-                    </div>
+            <div v-if="result" class="rounded-xl p-6 text-center shadow-sm" :class="result.allowed ? 'bg-brand-600 text-white' : 'bg-rose-600 text-white'">
+                <div class="text-2xl font-bold">{{ result.allowed ? t('welcome_member').replace('{name}', result.member) : t('denied') }}</div>
+                <div v-if="!result.allowed" class="mt-1">{{ reasonLabel(result.reason) }}</div>
+                <div v-if="result.allowed && result.balance > 0" class="mt-1 text-sm">
+                    {{ t('has_balance') }}: <bdi>{{ money(result.balance, currency) }}</bdi>
                 </div>
+                <div v-if="result.allowed && result.days_left !== null && result.days_left <= 7" class="mt-1 text-sm">
+                    {{ t('days_left').replace('{n}', num(result.days_left)) }}
+                </div>
+                <div v-if="result.allowed && result.sessions_remaining !== null" class="mt-1 text-sm">
+                    {{ t('sessions_left').replace('{n}', num(result.sessions_remaining)) }}
+                </div>
+            </div>
 
-                <div class="rounded-lg bg-white shadow-sm">
-                    <div class="border-b px-5 py-3 font-semibold text-gray-800">حضور اليوم ({{ today.length }})</div>
-                    <div v-if="!today.length" class="px-5 py-6 text-sm text-gray-500">لا يوجد حضور اليوم بعد</div>
-                    <ul v-else class="divide-y text-sm">
-                        <li v-for="c in today" :key="c.id" class="flex items-center justify-between px-5 py-2">
-                            <span class="font-medium">{{ c.member }}</span>
-                            <span class="flex items-center gap-2">
-                                <span class="text-gray-500" dir="ltr">{{ c.checked_in_at.split(' ')[1] }}</span>
-                                <span :class="c.result === 'allowed' ? 'text-emerald-700' : 'text-red-600'">
-                                    {{ c.result === 'allowed' ? 'دخل' : 'اترفض' }}
-                                </span>
-                            </span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="card !p-0 overflow-hidden">
+                <div class="border-b border-slate-100 px-5 py-3 font-bold text-ink-900">{{ t('todays_checkins').replace('{n}', num(today.length)) }}</div>
+                <p v-if="!today.length" class="px-5 py-6 text-sm text-slate-400">{{ t('no_checkins') }}</p>
+                <ul v-else class="divide-y divide-slate-100">
+                    <li v-for="c in today" :key="c.id" class="flex items-center justify-between gap-2 px-5 py-3 text-sm">
+                        <span class="font-semibold text-ink-900">{{ c.member }}</span>
+                        <span class="flex items-center gap-2">
+                            <bdi class="text-xs text-slate-400" dir="ltr">{{ c.checked_in_at.split(' ')[1] }}</bdi>
+                            <Badge :tone="c.result === 'allowed' ? 'green' : 'rose'">{{ c.result === 'allowed' ? t('entered') : t('denied') }}</Badge>
+                        </span>
+                    </li>
+                </ul>
             </div>
         </div>
     </AuthenticatedLayout>

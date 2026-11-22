@@ -1,9 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Badge from '@/Components/Badge.vue';
+import Field from '@/Components/Field.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { useI18n } from '@/lib/i18n';
 
 const props = defineProps({ staff: Array });
+const { t } = useI18n();
 
 const showForm = ref(false);
 const form = useForm({ name: '', email: '', phone: '', password: '', role: 'staff' });
@@ -13,60 +17,65 @@ function submit() {
 }
 
 function remove(id) {
-    if (confirm('حذف هذا الموظف؟')) {
+    if (confirm(t('confirm_delete_staff'))) {
         router.delete(route('staff.destroy', id));
     }
 }
 </script>
 
 <template>
-    <Head title="الفريق" />
+    <Head :title="t('staff')" />
     <AuthenticatedLayout>
-        <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-gray-800">الفريق</h2>
-                <button @click="showForm = !showForm" class="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white">+ موظف</button>
+        <div class="mx-auto max-w-4xl space-y-4">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl font-bold text-ink-900">{{ t('staff') }}</h2>
+                <button @click="showForm = !showForm" class="btn-primary btn-sm !py-2"><span class="text-base leading-none">+</span>{{ t('new_staff') }}</button>
             </div>
-        </template>
-        <div class="py-8">
-            <div class="mx-auto max-w-4xl space-y-4 px-4 sm:px-6 lg:px-8">
-                <form v-if="showForm" @submit.prevent="submit" class="grid grid-cols-1 gap-4 rounded-lg bg-white p-5 shadow-sm sm:grid-cols-2">
-                    <input v-model="form.name" placeholder="الاسم *" class="rounded-md border-gray-300" />
-                    <input v-model="form.email" dir="ltr" placeholder="البريد الإلكتروني *" class="rounded-md border-gray-300" />
-                    <input v-model="form.phone" dir="ltr" placeholder="الموبايل" class="rounded-md border-gray-300" />
-                    <input v-model="form.password" type="password" placeholder="كلمة سر مؤقتة *" class="rounded-md border-gray-300" />
-                    <select v-model="form.role" class="rounded-md border-gray-300">
-                        <option value="staff">موظف ريسبشن</option>
-                        <option value="owner">مالك</option>
-                    </select>
-                    <div class="flex gap-2">
-                        <button type="submit" :disabled="form.processing" class="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white">حفظ</button>
-                        <button type="button" @click="showForm = false" class="rounded-md bg-gray-100 px-4 py-2 text-sm">إلغاء</button>
-                    </div>
-                </form>
 
-                <div class="overflow-hidden rounded-lg bg-white shadow-sm">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-gray-50 text-gray-600">
-                            <tr>
-                                <th class="px-4 py-3 text-start font-medium">الاسم</th>
-                                <th class="px-4 py-3 text-start font-medium">البريد</th>
-                                <th class="px-4 py-3 text-start font-medium">الدور</th>
-                                <th class="px-4 py-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-for="u in staff" :key="u.id">
-                                <td class="px-4 py-3 font-medium">{{ u.name }} <span v-if="u.is_you" class="text-xs text-gray-400">(أنت)</span></td>
-                                <td class="px-4 py-3" dir="ltr">{{ u.email }}</td>
-                                <td class="px-4 py-3">{{ u.role === 'owner' ? 'مالك' : 'موظف' }}</td>
-                                <td class="px-4 py-3">
-                                    <button v-if="!u.is_you" @click="remove(u.id)" class="text-red-600">حذف</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <form v-if="showForm" @submit.prevent="submit" class="card">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field :label="t('member_name') + ' *'" :error="form.errors.name"><input v-model="form.name" class="input" /></Field>
+                    <Field :label="t('email') + ' *'" :error="form.errors.email"><input v-model="form.email" dir="ltr" class="input" /></Field>
+                    <Field :label="t('phone')" :error="form.errors.phone"><input v-model="form.phone" dir="ltr" class="input" /></Field>
+                    <Field :label="t('password_temp') + ' *'" :error="form.errors.password"><input v-model="form.password" type="password" class="input" /></Field>
+                    <Field :label="t('role')" :error="form.errors.role">
+                        <select v-model="form.role" class="input">
+                            <option value="staff">{{ t('role_staff') }}</option>
+                            <option value="owner">{{ t('role_owner') }}</option>
+                        </select>
+                    </Field>
                 </div>
+                <div class="mt-4 flex gap-2">
+                    <button type="submit" :disabled="form.processing" class="btn-primary">{{ t('save') }}</button>
+                    <button type="button" @click="showForm = false" class="btn-secondary">{{ t('cancel') }}</button>
+                </div>
+            </form>
+
+            <div class="card !p-0 overflow-x-auto">
+                <table class="stack min-w-full">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="th">{{ t('member_name') }}</th>
+                            <th class="th">{{ t('email') }}</th>
+                            <th class="th">{{ t('role') }}</th>
+                            <th class="th"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr v-for="u in staff" :key="u.id" class="hover:bg-slate-50">
+                            <td class="td font-semibold text-ink-900" :data-label="t('member_name')">
+                                {{ u.name }} <span v-if="u.is_you" class="text-xs text-slate-400">({{ t('you') }})</span>
+                            </td>
+                            <td class="td" :data-label="t('email')"><bdi dir="ltr">{{ u.email }}</bdi></td>
+                            <td class="td" :data-label="t('role')">
+                                <Badge :tone="u.role === 'owner' ? 'brand' : 'slate'">{{ u.role === 'owner' ? t('role_owner') : t('role_staff') }}</Badge>
+                            </td>
+                            <td class="td" data-label="">
+                                <button v-if="!u.is_you" @click="remove(u.id)" class="font-semibold text-rose-600 hover:text-rose-500">{{ t('delete') }}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </AuthenticatedLayout>
