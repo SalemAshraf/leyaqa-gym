@@ -57,6 +57,7 @@ class SubscriptionController extends Controller
 
         // BelongsToGym global scope guarantees these belong to the caller's gym.
         $member = Member::findOrFail($data['member_id']);
+        abort_unless($member->accessibleBy($request->user()), 404);
         $plan = Plan::findOrFail($data['plan_id']);
         abort_unless($plan->is_active, 422, 'الباقة غير مفعّلة');
 

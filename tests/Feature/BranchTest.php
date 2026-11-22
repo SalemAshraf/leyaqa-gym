@@ -75,6 +75,9 @@ it('scopes branch-pinned staff to their branch and keeps the owner global', func
     $memberA = Member::factory()->create(['gym_id' => $gym->id, 'branch_id' => $a->id, 'name' => 'عضو الفرع أ', 'phone' => '011']);
     $memberB = Member::factory()->create(['gym_id' => $gym->id, 'branch_id' => $b->id, 'name' => 'عضو الفرع ب', 'phone' => '012']);
 
+    // A member with no branch is NOT exposed to branch-pinned staff either.
+    $memberFree = Member::factory()->create(['gym_id' => $gym->id, 'branch_id' => null, 'name' => 'عضو بلا فرع', 'phone' => '014']);
+
     $staff = User::factory()->create(['gym_id' => $gym->id, 'branch_id' => $a->id]);
     $staff->assignRole(Role::findByName('staff'));
 
@@ -83,6 +86,10 @@ it('scopes branch-pinned staff to their branch and keeps the owner global', func
         ->assertInertia(fn ($page) => $page->has('members.data', 1));
     $this->actingAs($staff)->get('/members/search?q=عضو')
         ->assertJsonCount(1);
+
+    // Unassigned member is invisible to pinned staff, visible to the owner.
+    $this->actingAs($staff)->get("/members/{$memberFree->id}")->assertNotFound();
+    $this->actingAs($owner)->get("/members/{$memberFree->id}")->assertOk();
 
     // Staff cannot open or edit the other branch's member.
     $this->actingAs($staff)->get("/members/{$memberB->id}")->assertNotFound();
@@ -94,7 +101,7 @@ it('scopes branch-pinned staff to their branch and keeps the owner global', func
     // Owner still sees and edits everyone.
     $this->actingAs($owner)->get("/members/{$memberB->id}")->assertOk();
     $this->actingAs($owner)->get('/members')
-        ->assertInertia(fn ($page) => $page->has('members.data', 2));
+        ->assertInertia(fn ($page) => $page->has('members.data', 3));
 });
 
 it('blocks branch-pinned staff from checking in another branch\'s member', function () {
@@ -107,6 +114,9 @@ it('blocks branch-pinned staff from checking in another branch\'s member', funct
     $staff->assignRole(Role::findByName('staff'));
 
     $this->actingAs($staff)->post('/check-in', ['qr_token' => $memberB->qr_token])->assertNotFound();
+
+    $memberFree = Member::factory()->create(['gym_id' => $gym->id, 'branch_id' => null, 'name' => 'عضو بلا فرع', 'phone' => '015']);
+    $this->actingAs($staff)->post('/check-in', ['qr_token' => $memberFree->qr_token])->assertNotFound();
     expect(CheckIn::count())->toBe(0);
 
     // Owner check-in records the member's branch on the log row.
@@ -141,4 +151,29 @@ it('assigns members and staff to branches with same-gym validation', function ()
     $staffUser = User::firstWhere('email', 'staff@x.com');
     $this->actingAs($owner)->put("/staff/{$staffUser->id}", ['branch_id' => null])->assertSessionHasNoErrors();
     expect($staffUser->fresh()->branch_id)->toBeNull();
+});
+
+it('blocks pinned staff from subscribing or class-booking another branch member', function () {
+    [$gym, $owner] = branchGym();
+    $a = \App\Models\Branch::factory()->create(['gym_id' => $gym->id, 'name' => 'أ']);
+    $b = \App\Models\Branch::factory()->create(['gym_id' => $gym->id, 'name' => 'ب']);
+    $memberB = Member::factory()->create(['gym_id' => $gym->id, 'branch_id' => $b->id, 'name' => 'عضو ب', 'phone' => '016']);
+    $plan = \App\Models\Plan::factory()->create(['gym_id' => $gym->id]);
+    $class = \App\Models\GymClass::factory()->create(['gym_id' => $gym->id]);
+
+    $staff = User::factory()->create(['gym_id' => $gym->id, 'branch_id' => $a->id]);
+    $staff->assignRole(Role::findByName('staff'));
+
+    $this->actingAs($staff)->post('/subscriptions', [
+        'member_id' => $memberB->id, 'plan_id' => $plan->id, 'starts_at' => now()->toDateString(),
+    ])->assertNotFound();
+
+    $this->actingAs($staff)->post("/classes/{$class->id}/bookings", [
+        'member_id' => $memberB->id, 'class_date' => now()->addDay()->toDateString(),
+    ])->assertNotFound();
+
+    // Same actions by the owner pass the branch guard (may fail later validation, never 404).
+    $this->actingAs($owner)->post('/subscriptions', [
+        'member_id' => $memberB->id, 'plan_id' => $plan->id, 'starts_at' => now()->toDateString(),
+    ])->assertSessionHasNoErrors();
 });

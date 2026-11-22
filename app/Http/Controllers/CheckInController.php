@@ -23,7 +23,7 @@ class CheckInController extends Controller
             'today' => CheckIn::with('member')
                 ->whereBetween('checked_in_at', [$todayStartUtc, $todayEndUtc])
                 ->when($request->user()->branch_id && ! $request->user()->hasRole('owner'),
-                    fn ($q) => $q->where(fn ($w) => $w->where('branch_id', $request->user()->branch_id)->orWhereNull('branch_id')))
+                    fn ($q) => $q->where('branch_id', $request->user()->branch_id))
                 ->orderByDesc('checked_in_at')
                 ->limit(50)
                 ->get()
@@ -55,9 +55,8 @@ class CheckInController extends Controller
         }
 
         abort_unless($member, 404, 'العضو غير موجود');
-        // Branch-pinned staff cannot check in members of another branch.
-        abort_if($request->user()->branch_id && ! $request->user()->hasRole('owner')
-            && $member->branch_id && $member->branch_id !== $request->user()->branch_id, 404, 'العضو غير موجود');
+        // Branch-pinned staff can only check in members of their own branch.
+        abort_unless($member->accessibleBy($request->user()), 404, 'العضو غير موجود');
         abort_if($member->status !== 'active', 422, 'العضو غير نشط');
 
         $result = DB::transaction(function () use ($member, $data) {

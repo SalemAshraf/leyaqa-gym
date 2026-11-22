@@ -101,9 +101,11 @@ class MemberController extends Controller
             ];
         });
 
+        $user = $request->user();
+
         return Inertia::render('Members/Index', [
             'members' => $members,
-            'branches' => Branch::orderBy('name')->get(['id', 'name']),
+            'branches' => (! $user->branch_id || $user->hasRole('owner')) ? Branch::orderBy('name')->get(['id', 'name']) : [],
             'filters' => [
                 'search' => $request->string('search')->toString(),
                 'branch_id' => $request->integer('branch_id') ?: null,
@@ -148,8 +150,7 @@ class MemberController extends Controller
     public function show(Request $request, Member $member)
     {
         abort_unless($request->user()->can('members.manage'), 403);
-        abort_if($request->user()->branch_id && ! $request->user()->hasRole('owner')
-            && $member->branch_id && $member->branch_id !== $request->user()->branch_id, 404);
+        abort_unless($member->accessibleBy($request->user()), 404);
 
         $member->load(['subscriptions.plan', 'subscriptions.payments', 'checkIns' => fn ($q) => $q->latest('checked_in_at')->limit(20)]);
 
@@ -189,7 +190,7 @@ class MemberController extends Controller
                 'method' => $c->method,
             ]),
             'plans' => Plan::where('is_active', true)->orderBy('name')->get(['id', 'name', 'type', 'duration_days', 'sessions_count', 'price']),
-            'branches' => Branch::orderBy('name')->get(['id', 'name']),
+            'branches' => (! $request->user()->branch_id || $request->user()->hasRole('owner')) ? Branch::orderBy('name')->get(['id', 'name']) : [],
             'currency' => $request->user()->gym->currency,
         ]);
     }
@@ -197,8 +198,7 @@ class MemberController extends Controller
     public function update(Request $request, Member $member)
     {
         abort_unless($request->user()->can('members.manage'), 403);
-        abort_if($request->user()->branch_id && ! $request->user()->hasRole('owner')
-            && $member->branch_id && $member->branch_id !== $request->user()->branch_id, 404);
+        abort_unless($member->accessibleBy($request->user()), 404);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',

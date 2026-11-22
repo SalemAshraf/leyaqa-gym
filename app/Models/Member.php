@@ -40,14 +40,19 @@ class Member extends Model
     }
 
     /**
-     * Staff pinned to a branch only see that branch's members (and members
-     * without a branch). Owners and unpinned users see everyone.
+     * Staff pinned to a branch see only that branch's members.
+     * Owners and unpinned users see everyone.
      */
     public function scopeVisibleTo($query, User $user): void
     {
         if ($user->branch_id && ! $user->hasRole('owner')) {
-            $query->where(fn ($q) => $q->where('branch_id', $user->branch_id)->orWhereNull('branch_id'));
+            $query->where('branch_id', $user->branch_id);
         }
+    }
+
+    public function accessibleBy(User $user): bool
+    {
+        return ! ($user->branch_id && ! $user->hasRole('owner') && $this->branch_id !== $user->branch_id);
     }
 
     public function subscriptions(): HasMany

@@ -21,6 +21,7 @@ class ClassBookingController extends Controller
         ]);
 
         $member = Member::findOrFail($data['member_id']);
+        abort_unless($member->accessibleBy($request->user()), 404);
         $date = Carbon::parse($data['class_date'])->toDateString();
 
         if ($member->status !== 'active') {
