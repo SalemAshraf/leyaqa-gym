@@ -89,6 +89,36 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
             </div>
         </section>
 
+        <section class="relative overflow-hidden bg-[#070D1A] py-20">
+            <div class="pointer-events-none absolute -start-32 top-0 h-[400px] w-[400px] rounded-full bg-brand-500/15 blur-[130px]"></div>
+            <div class="relative mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-2">
+                <div>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-bold text-brand-300">
+                        <span class="h-1.5 w-1.5 rounded-full bg-brand-400"></span>{{ t('la_badge') }}
+                    </span>
+                    <h2 class="mt-6 text-3xl font-black leading-snug text-white lg:text-4xl">{{ t('la_title') }}</h2>
+                    <p class="mt-4 max-w-lg leading-[1.9] text-slate-300">{{ t('la_sub') }}</p>
+                    <ul class="mt-8 space-y-3">
+                        <li v-for="b in ['la_b1', 'la_b2', 'la_b3', 'la_b4']" :key="b" class="flex items-start gap-3 text-sm text-slate-200">
+                            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-400/20 text-brand-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>
+                            </span>
+                            {{ t(b) }}
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative">
+                    <div class="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-tl from-brand-500/20 via-transparent to-brand-300/10 blur-2xl"></div>
+                    <div class="relative space-y-4 rounded-2xl border border-white/15 bg-white/5 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.6)] ring-1 ring-white/10 backdrop-blur">
+                        <div v-for="qa in [['la_q1', 'la_a1'], ['la_q2', 'la_a2'], ['la_q3', 'la_a3']]" :key="qa[0]" class="space-y-2">
+                            <div class="ms-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-brand-400 px-4 py-2.5 text-sm font-bold text-[#0B1220] rtl:rounded-tr-2xl rtl:rounded-tl-sm">{{ t(qa[0]) }}</div>
+                            <div class="w-fit max-w-[85%] rounded-2xl rounded-tl-sm border border-white/10 bg-white/10 px-4 py-2.5 text-sm text-slate-100 rtl:rounded-tl-2xl rtl:rounded-tr-sm">{{ t(qa[1]) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="bg-[#0B1220] py-20">
             <div class="mx-auto max-w-6xl px-4">
                 <h2 class="text-center text-3xl font-black lg:text-4xl">{{ t('how_title') }}</h2>

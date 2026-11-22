@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::get('check-in', [CheckInController::class, 'index'])->name('checkins.index');
     Route::post('check-in', [CheckInController::class, 'store'])->name('checkins.store');
 
+    Route::patch('settings/ai', [SettingsController::class, 'aiToggle'])->name('settings.ai');
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
 
@@ -83,6 +84,20 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Read-only AI connector (Claude over MCP): OAuth 2.1 discovery, registration, token, revoke.
+Route::get('/.well-known/oauth-protected-resource/{any?}', [\App\Http\Controllers\OauthController::class, 'resourceMetadata'])->where('any', '.*');
+Route::get('/.well-known/oauth-authorization-server/{any?}', [\App\Http\Controllers\OauthController::class, 'serverMetadata'])->where('any', '.*');
+Route::post('/oauth/register', [\App\Http\Controllers\OauthController::class, 'register'])->middleware('throttle:20,1');
+Route::post('/oauth/token', [\App\Http\Controllers\OauthController::class, 'token'])->middleware('throttle:60,1');
+Route::post('/oauth/revoke', [\App\Http\Controllers\OauthController::class, 'revoke'])->middleware('throttle:60,1');
+Route::post('/mcp', [\App\Http\Controllers\McpController::class, 'handle'])->middleware('throttle:60,1')->name('mcp');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/oauth/authorize', [\App\Http\Controllers\OauthController::class, 'authorizeForm'])->name('oauth.authorize');
+    Route::post('/oauth/authorize', [\App\Http\Controllers\OauthController::class, 'decide'])->name('oauth.decide');
+    // Revoking an AI connection is always allowed, even for a billing-locked gym.
+    Route::delete('/settings/ai-connections/{family}', [SettingsController::class, 'aiConnectionRevoke'])->name('settings.ai.disconnect');
 });
 
 Route::post('locale', \App\Http\Controllers\LocaleController::class)->name('locale');
