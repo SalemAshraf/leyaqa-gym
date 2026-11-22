@@ -35,7 +35,8 @@ function subscribe(plan) {
                         {{ t('platform_status') }}: <Badge :tone="tones[billing.status]">{{ t('pstatus_' + billing.status) }}</Badge>
                     </div>
                     <p class="mt-1 text-sm text-slate-500">
-                        <template v-if="billing.status === 'trialing'">{{ t('trial_left').replace('{d}', num(billing.trial_days_left)).replace('{date}', billing.trial_ends_at) }}</template>
+                        <template v-if="billing.status === 'pending'">{{ t('pending_note') }}</template>
+                        <template v-else-if="billing.status === 'trialing'">{{ t('trial_left').replace('{d}', num(billing.trial_days_left)).replace('{date}', billing.trial_ends_at) }}</template>
                         <template v-else-if="billing.renews_at">{{ t('renews_at').replace('{date}', billing.renews_at) }}<template v-if="billing.plan"> · {{ locale === 'ar' ? billing.plan.name_ar : billing.plan.name_en }}</template></template>
                     </p>
                 </div>

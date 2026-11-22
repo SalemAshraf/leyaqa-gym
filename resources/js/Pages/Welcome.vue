@@ -40,7 +40,7 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
                 </nav>
                 <div class="flex items-center gap-2">
                     <Link :href="route('login')" class="btn-secondary btn-sm">{{ t('login') }}</Link>
-                    <Link :href="route('register')" class="btn-primary btn-sm">{{ t('start_trial') }}</Link>
+                    <Link :href="route('register')" class="btn-primary btn-sm">{{ trialDays ? t('start_trial') : t('start_now') }}</Link>
                 </div>
             </div>
         </header>
@@ -55,21 +55,8 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
                 </div>
                 <p v-if="trialDays" class="mt-3 text-xs text-slate-400">{{ t('trial_note') }}</p>
             </div>
-            <div class="card !p-5 shadow-xl">
-                <div class="mb-4 flex items-center justify-between">
-                    <div class="font-bold">{{ t('mock_dashboard') }}</div>
-                    <div class="h-2 w-16 rounded-full bg-slate-100"></div>
-                </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="rounded-xl bg-brand-50 p-3"><div class="text-[11px] text-slate-400">{{ t('mock_revenue') }}</div><div class="mt-1 h-4 w-14 rounded bg-brand-200"></div></div>
-                    <div class="rounded-xl bg-emerald-50 p-3"><div class="text-[11px] text-slate-400">{{ t('mock_checkins') }}</div><div class="mt-1 h-4 w-10 rounded bg-emerald-200"></div></div>
-                    <div class="rounded-xl bg-amber-50 p-3"><div class="text-[11px] text-slate-400">{{ t('mock_expiring') }}</div><div class="mt-1 h-4 w-12 rounded bg-amber-200"></div></div>
-                </div>
-                <div class="mt-4 space-y-2">
-                    <div class="flex items-center gap-2 rounded-lg border border-slate-100 p-2"><div class="h-8 w-8 rounded-full bg-slate-100"></div><div class="h-3 w-28 rounded bg-slate-100"></div><div class="ms-auto h-5 w-12 rounded-full bg-emerald-100"></div></div>
-                    <div class="flex items-center gap-2 rounded-lg border border-slate-100 p-2"><div class="h-8 w-8 rounded-full bg-slate-100"></div><div class="h-3 w-24 rounded bg-slate-100"></div><div class="ms-auto h-5 w-12 rounded-full bg-amber-100"></div></div>
-                    <div class="flex items-center gap-2 rounded-lg border border-slate-100 p-2"><div class="h-8 w-8 rounded-full bg-slate-100"></div><div class="h-3 w-32 rounded bg-slate-100"></div><div class="ms-auto h-5 w-12 rounded-full bg-emerald-100"></div></div>
-                </div>
+            <div class="overflow-hidden rounded-2xl border border-slate-200 shadow-xl">
+                <img src="/img/landing-dashboard.png" :alt="t('mock_dashboard')" class="block w-full" loading="lazy" />
             </div>
         </section>
 
@@ -107,7 +94,7 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
                         <div class="text-lg font-bold">{{ isAr ? p.name_ar : p.name_en }}</div>
                         <div class="mt-2 text-3xl font-extrabold text-brand-700">{{ price(p) }}</div>
                         <div class="text-sm text-slate-400">/ {{ t('interval_' + p.interval) }}</div>
-                        <Link :href="route('register')" class="btn-primary mt-6 w-full">{{ t('start_trial') }}</Link>
+                        <Link :href="route('register')" class="btn-primary mt-6 w-full">{{ trialDays ? t('start_trial') : t('start_now') }}</Link>
                     </div>
                 </div>
             </div>

@@ -59,8 +59,18 @@ class PlatformAdminController extends Controller
     {
         abort_if($invoice->status === 'paid', 422, 'مدفوعة بالفعل');
 
-        DB::transaction(function () use ($invoice) {
-            $invoice->update(['status' => 'paid', 'paid_at' => now()]);
+        // A plan without a configured price must never become a zero-amount paid
+        // invoice: the admin confirms the actual collected amount explicitly.
+        $data = $request->validate([
+            'amount_cents' => [$invoice->amount_cents === null ? 'required' : 'nullable', 'integer', 'min:0'],
+        ]);
+
+        DB::transaction(function () use ($invoice, $data) {
+            $invoice->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'amount_cents' => $invoice->amount_cents ?? $data['amount_cents'],
+            ]);
             // Older pending requests for the same gym are superseded.
             PlatformInvoice::where('gym_id', $invoice->gym_id)->where('status', 'pending')->where('id', '!=', $invoice->id)->update(['status' => 'void']);
             $invoice->gym->update([

@@ -49,8 +49,9 @@ class RegisteredUserController extends Controller
                 'currency' => $currencies[$request->country],
                 'timezone' => $timezones[$request->country],
                 'locale' => 'ar',
-                // Trial only exists once the product owner configures its length.
-                'platform_status' => $trialDays ? 'trialing' : 'active',
+                // New gyms wait for the platform owner to activate them: no silent free
+                // access, and a trial only exists once its length is configured.
+                'platform_status' => $trialDays ? 'trialing' : 'pending',
                 'trial_ends_at' => $trialDays ? \Carbon\Carbon::today($timezones[$request->country])->addDays($trialDays) : null,
             ]);
 

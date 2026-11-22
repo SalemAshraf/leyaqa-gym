@@ -12,5 +12,6 @@ return [
     'admin_emails' => array_filter(array_map('trim', explode(',', (string) env('PLATFORM_ADMIN_EMAILS', '')))),
 
     // Grace period after a paid period ends before the app locks (days).
-    'grace_days' => (int) env('PLATFORM_GRACE_DAYS', 7),
+    // 0 until the product owner chooses commercial terms.
+    'grace_days' => ($g = env('PLATFORM_GRACE_DAYS')) !== null && $g !== '' ? (int) $g : 0,
 ];

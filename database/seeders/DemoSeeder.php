@@ -36,6 +36,7 @@ class DemoSeeder extends Seeder
         $owner = User::create([
             'name' => 'مالك تجريبي',
             'email' => 'demo@example.com',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'gym_id' => $gym->id,
         ]);

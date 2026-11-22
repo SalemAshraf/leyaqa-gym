@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Field from '@/Components/Field.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from '@/lib/i18n';
 
 const props = defineProps({ gym: Object, currencies: Array });
@@ -16,6 +16,10 @@ const countries = { EG: 'مصر', SA: 'السعودية', AE: 'الإمارات'
 
 function submit() {
     form.put(route('settings.update'));
+}
+
+function showSetupGuide() {
+    router.post(route('setup.show'), {}, { preserveScroll: true });
 }
 </script>
 
@@ -43,6 +47,13 @@ function submit() {
                 </div>
                 <button type="submit" :disabled="form.processing" class="btn-primary">{{ t('save') }}</button>
             </form>
+            <div class="card flex items-center justify-between gap-3">
+                <div>
+                    <div class="font-bold text-ink-900">{{ t('setup_guide') }}</div>
+                    <p class="text-sm text-slate-500">{{ t('setup_guide_d') }}</p>
+                </div>
+                <button @click="showSetupGuide" class="btn-secondary btn-sm whitespace-nowrap">{{ t('setup_guide_show') }}</button>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>

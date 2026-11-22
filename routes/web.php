@@ -34,6 +34,11 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
 
         return back();
     })->name('setup.dismiss');
+    Route::post('/setup/show', function () {
+        auth()->user()->gym->update(['setup_dismissed_at' => null]);
+
+        return back();
+    })->name('setup.show');
     Route::get('reports', \App\Http\Controllers\ReportsController::class)->name('reports');
 
     Route::get('classes', [\App\Http\Controllers\ClassController::class, 'index'])->name('classes.index');

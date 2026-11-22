@@ -4,20 +4,6 @@ use App\Models\Gym;
 use App\Models\PlatformInvoice;
 use App\Models\PlatformPlan;
 
-it('registers gyms as active while no trial terms are configured', function () {
-    config()->set('platform.trial_days', null);
-
-    $this->post('/register', [
-        'gym_name' => 'جيم مباشر', 'country' => 'EG', 'name' => 'Owner',
-        'email' => 'direct@example.com', 'password' => 'password', 'password_confirmation' => 'password',
-    ]);
-
-    $gym = Gym::where('name', 'جيم مباشر')->first();
-    expect($gym->platform_status)->toBe('active')
-        ->and($gym->trial_ends_at)->toBeNull()
-        ->and($gym->platformAccessible())->toBeTrue();
-});
-
 it('starts every new gym on a free trial once terms are configured', function () {
     config()->set('platform.trial_days', 14);
 
@@ -63,7 +49,7 @@ it('lets the owner request a plan and the platform admin confirm payment', funct
     // The platform admin marks it paid: gym activates and the app unlocks.
     [$adminGym, $admin] = makeOwner();
     $admin->update(['email' => 'boss@quwa.app']);
-    $this->actingAs($admin)->post("/platform/invoices/{$invoice->id}/paid")->assertSessionHasNoErrors();
+    $this->actingAs($admin)->post("/platform/invoices/{$invoice->id}/paid", ['amount_cents' => 49900])->assertSessionHasNoErrors();
 
     $gym->refresh();
     expect($gym->platform_status)->toBe('active')
@@ -100,5 +86,66 @@ it('keeps active gyms inside the grace period accessible', function () {
     expect($gym->platformAccessible())->toBeTrue();
 
     $gym->update(['platform_renews_at' => now('Africa/Cairo')->subDays(30)]);
+    expect($gym->platformAccessible())->toBeFalse();
+});
+
+it('never confirms a priceless invoice without an explicit amount', function () {
+    config()->set('platform.admin_emails', ['boss@quwa.app']);
+    [$gym, $owner] = makeOwner();
+    $gym->update(['platform_status' => 'pending']);
+    $plan = PlatformPlan::where('slug', 'monthly')->first(); // price NULL by default
+    $this->actingAs($owner)->post('/billing/subscribe', ['plan_id' => $plan->id]);
+    $invoice = PlatformInvoice::first();
+    expect($invoice->amount_cents)->toBeNull();
+
+    [$aG, $admin] = makeOwner();
+    $admin->update(['email' => 'boss@quwa.app']);
+
+    // Confirming without an amount is rejected; nothing activates.
+    $this->actingAs($admin)->post("/platform/invoices/{$invoice->id}/paid")->assertSessionHasErrors('amount_cents');
+    expect($invoice->fresh()->status)->toBe('pending');
+    expect($gym->fresh()->platform_status)->not->toBe('active');
+
+    // The collected amount is recorded explicitly with the confirmation.
+    $this->actingAs($admin)->post("/platform/invoices/{$invoice->id}/paid", ['amount_cents' => 49900]);
+    $invoice->refresh();
+    expect($invoice->status)->toBe('paid')->and($invoice->amount_cents)->toBe(49900);
+    expect($gym->fresh()->platform_status)->toBe('active');
+});
+
+it('does not let an unverified email claim platform admin access', function () {
+    config()->set('platform.admin_emails', ['boss@quwa.app']);
+    [$gym, $owner] = makeOwner();
+
+    // Tenant user sets their profile email to the admin address: the change unverifies it.
+    $owner->forceFill(['email' => 'boss@quwa.app', 'email_verified_at' => null])->save();
+    $this->actingAs($owner->fresh())->get('/platform')->assertForbidden();
+
+    // Only a verified owner of that address gets in.
+    $owner->forceFill(['email_verified_at' => now()])->save();
+    $this->actingAs($owner->fresh())->get('/platform')->assertOk();
+});
+
+it('registers gyms as pending until the platform owner activates them', function () {
+    config()->set('platform.trial_days', null);
+
+    $this->post('/register', [
+        'gym_name' => 'جيم منتظر', 'country' => 'EG', 'name' => 'Owner',
+        'email' => 'pending@example.com', 'password' => 'password', 'password_confirmation' => 'password',
+    ]);
+
+    $gym = Gym::where('name', 'جيم منتظر')->first();
+    expect($gym->platform_status)->toBe('pending')->and($gym->platformAccessible())->toBeFalse();
+
+    // The new owner lands on the billing page, which stays reachable.
+    $owner = $gym->users()->first();
+    $this->actingAs($owner->fresh())->get('/dashboard')->assertRedirect(route('billing.show', absolute: false));
+    $this->actingAs($owner->fresh())->get('/billing')->assertOk();
+});
+
+it('gives no grace period until one is configured', function () {
+    config()->set('platform.grace_days', 0);
+    [$gym, $owner] = makeOwner();
+    $gym->update(['platform_status' => 'active', 'platform_renews_at' => now('Africa/Cairo')->subDay()]);
     expect($gym->platformAccessible())->toBeFalse();
 });

@@ -10,8 +10,9 @@ const { t, num } = useI18n();
 const tones = { trialing: 'brand', active: 'green', past_due: 'amber', suspended: 'rose' };
 const invTones = { pending: 'amber', paid: 'green', void: 'slate' };
 const days = ref(14);
+const amounts = ref({});
 
-const markPaid = (id) => router.post(route('platform.invoices.paid', id), {}, { preserveScroll: true });
+const markPaid = (i) => router.post(route('platform.invoices.paid', i.id), { amount_cents: i.amount_cents == null ? Math.round((amounts.value[i.id] || 0) * 100) : undefined }, { preserveScroll: true });
 const extend = () => router.post(route('platform.gyms.extend-trial', props.gym.id), { days: days.value }, { preserveScroll: true });
 const setStatus = (status) => router.post(route('platform.gyms.status', props.gym.id), { status }, { preserveScroll: true });
 </script>
@@ -49,7 +50,12 @@ const setStatus = (status) => router.post(route('platform.gyms.status', props.gy
                             <td>{{ i.amount_cents == null ? '—' : num(i.amount_cents / 100) + ' ' + i.currency }}</td>
                             <td class="text-slate-500" dir="ltr">{{ i.period }}</td>
                             <td><Badge :tone="invTones[i.status]">{{ t('inv_' + i.status) }}</Badge></td>
-                            <td><button v-if="i.status === 'pending'" @click="markPaid(i.id)" class="text-sm font-semibold text-emerald-700 hover:text-emerald-600">{{ t('confirm_paid') }}</button></td>
+                            <td>
+                            <div v-if="i.status === 'pending'" class="flex items-center justify-end gap-2">
+                                <input v-if="i.amount_cents == null" v-model.number="amounts[i.id]" type="number" min="0" step="0.01" :placeholder="t('collected_amount')" class="input !w-28 !py-1.5 text-sm" dir="ltr" />
+                                <button @click="markPaid(i)" class="text-sm font-semibold text-emerald-700 hover:text-emerald-600">{{ t('confirm_paid') }}</button>
+                            </div>
+                        </td>
                         </tr>
                         <tr v-if="!invoices.length"><td colspan="6" class="text-center text-sm text-slate-400">{{ t('no_invoices') }}</td></tr>
                     </tbody>

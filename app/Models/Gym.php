@@ -30,7 +30,7 @@ class Gym extends Model
         return match ($this->platform_status) {
             'trialing' => $this->trialDaysLeft() > 0,
             'active' => ! $this->platform_renews_at
-                || now($this->timezone ?: 'UTC')->startOfDay()->lte($this->platform_renews_at->copy()->addDays((int) config('platform.grace_days', 7))),
+                || now($this->timezone ?: 'UTC')->startOfDay()->lte($this->platform_renews_at->copy()->addDays((int) config('platform.grace_days', 0))),
             default => false,
         };
     }
