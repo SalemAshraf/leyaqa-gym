@@ -107,7 +107,7 @@ const statusesLabeled = props.statuses.map((r) => ({ ...r, label: t('s_' + r.lab
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr v-for="r in [...revenueByDay].reverse()" :key="r.day" :class="{ 'text-slate-400': r.count === 0 }">
-                                <td class="px-4 py-2"><bdi dir="ltr">{{ r.day }}</bdi></td>
+                                <td class="whitespace-nowrap px-4 py-2"><bdi dir="ltr">{{ r.day }}</bdi></td>
                                 <td class="px-4 py-2">{{ num(r.count) }}</td>
                                 <td class="px-4 py-2 text-end font-semibold"><bdi>{{ money(r.revenue, currency) }}</bdi></td>
                             </tr>
@@ -136,7 +136,7 @@ const statusesLabeled = props.statuses.map((r) => ({ ...r, label: t('s_' + r.lab
                 <div class="border-b border-slate-100 px-5 py-3 font-bold text-ink-900">{{ t('rep_latest_payments') }}</div>
                 <p v-if="!latestPayments.length" class="px-5 py-6 text-sm text-slate-400">{{ t('no_data') }}</p>
                 <div v-else class="overflow-x-auto">
-                    <table class="w-full min-w-[640px] text-sm">
+                    <table class="stack min-w-full text-sm">
                         <thead class="bg-slate-50 text-xs text-slate-500">
                             <tr>
                                 <th class="px-5 py-2 text-start font-semibold">{{ t('member') }}</th>
@@ -148,14 +148,14 @@ const statusesLabeled = props.statuses.map((r) => ({ ...r, label: t('s_' + r.lab
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr v-for="p in latestPayments" :key="p.id">
-                                <td class="px-5 py-2.5">
+                                <td class="px-5 py-2.5" :data-label="t('member')">
                                     <Link v-if="p.member_id" :href="route('members.show', p.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ p.member }}</Link>
                                     <span v-else class="font-semibold text-ink-900">{{ p.member }}</span>
                                 </td>
-                                <td class="px-5 py-2.5 text-slate-600">{{ p.plan }}</td>
-                                <td class="px-5 py-2.5 text-slate-600">{{ methodLabel(p.method) }}</td>
-                                <td class="px-5 py-2.5 text-slate-500"><bdi dir="ltr">{{ p.paid_at }}</bdi></td>
-                                <td class="px-5 py-2.5 text-end font-semibold"><bdi>{{ money(p.amount, currency) }}</bdi></td>
+                                <td class="px-5 py-2.5 text-slate-600" :data-label="t('plan')">{{ p.plan }}</td>
+                                <td class="px-5 py-2.5 text-slate-600" :data-label="t('method')">{{ methodLabel(p.method) }}</td>
+                                <td class="px-5 py-2.5 text-slate-500" :data-label="t('date')"><bdi dir="ltr">{{ p.paid_at }}</bdi></td>
+                                <td class="px-5 py-2.5 text-end font-semibold" :data-label="t('rep_amount')"><bdi>{{ money(p.amount, currency) }}</bdi></td>
                             </tr>
                         </tbody>
                     </table>

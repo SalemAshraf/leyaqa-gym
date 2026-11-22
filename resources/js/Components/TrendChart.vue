@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 const props = defineProps({ rows: Array, valueKey: { type: String, default: 'revenue' }, format: Function, maxLabels: { type: Number, default: 8 } });
 const { num } = useI18n();
@@ -7,12 +7,30 @@ const max = computed(() => Math.max(1, ...props.rows.map((r) => r[props.valueKey
 const h = (v) => Math.max(v ? 4 : 0, (v / max.value) * 120);
 const fmt = (v) => (props.format ? props.format(v) : num(v));
 const labelOf = (r) => (r.month ? r.month.slice(5) : (r.day ? r.day.slice(5) : r.hour));
-// Thin labels so dense series (24 hours, 30+ days) never overflow the card on mobile.
-const step = computed(() => Math.max(1, Math.ceil(props.rows.length / props.maxLabels)));
+// Thin labels so dense series (24 hours, 30+ days) never overflow or collide,
+// based on the actual container width and label text width.
+const root = ref(null);
+const width = ref(0);
+let ro;
+onMounted(() => {
+    width.value = root.value?.clientWidth || 0;
+    ro = new ResizeObserver((entries) => { width.value = entries[0].contentRect.width; });
+    if (root.value) ro.observe(root.value);
+});
+onBeforeUnmount(() => ro?.disconnect());
+const step = computed(() => {
+    const n = props.rows.length;
+    if (!n) return 1;
+    const label = String(labelOf(props.rows[0]) ?? '');
+    const pitch = Math.max(30, label.length * 7.5 + 16); // px needed per shown label
+    const fit = width.value ? Math.max(1, Math.floor(width.value / pitch)) : props.maxLabels;
+    const maxN = Math.max(1, Math.min(props.maxLabels, fit));
+    return Math.max(1, Math.ceil(n / maxN));
+});
 const showLabel = (i) => (i % step.value === 0 && props.rows.length - 1 - i >= Math.ceil(step.value / 2)) || i === props.rows.length - 1;
 </script>
 <template>
-    <div class="overflow-hidden">
+    <div ref="root" class="overflow-hidden">
         <div class="flex items-end justify-between gap-2" style="height: 150px" dir="ltr">
             <div v-for="(r, i) in rows" :key="r.month || r.day || r.hour" class="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
                 <div class="flex w-full items-end justify-center" style="height: 130px">
