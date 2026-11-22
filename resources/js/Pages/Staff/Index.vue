@@ -6,14 +6,18 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ staff: Array });
+const props = defineProps({ staff: Array, branches: Array });
 const { t } = useI18n();
 
 const showForm = ref(false);
-const form = useForm({ name: '', email: '', phone: '', password: '', role: 'staff' });
+const form = useForm({ name: '', email: '', phone: '', password: '', role: 'staff', branch_id: '' });
 
 function submit() {
     form.post(route('staff.store'), { onSuccess: () => { showForm.value = false; form.reset(); } });
+}
+
+function setBranch(u, branchId) {
+    router.put(route('staff.update', u.id), { branch_id: branchId || null }, { preserveScroll: true });
 }
 
 function remove(id) {
@@ -44,6 +48,12 @@ function remove(id) {
                             <option value="owner">{{ t('role_owner') }}</option>
                         </select>
                     </Field>
+                    <Field v-if="branches?.length" :label="t('branch')" :error="form.errors.branch_id">
+                        <select v-model="form.branch_id" class="input">
+                            <option value="">{{ t('all_branches') }}</option>
+                            <option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                        </select>
+                    </Field>
                 </div>
                 <div class="mt-4 flex gap-2">
                     <button type="submit" :disabled="form.processing" class="btn-primary">{{ t('save') }}</button>
@@ -58,6 +68,7 @@ function remove(id) {
                             <th class="th">{{ t('member_name') }}</th>
                             <th class="th">{{ t('email') }}</th>
                             <th class="th">{{ t('role') }}</th>
+                            <th v-if="branches?.length" class="th">{{ t('branch') }}</th>
                             <th class="th"></th>
                         </tr>
                     </thead>
@@ -69,6 +80,13 @@ function remove(id) {
                             <td class="td" :data-label="t('email')"><bdi dir="ltr">{{ u.email }}</bdi></td>
                             <td class="td" :data-label="t('role')">
                                 <Badge :tone="u.role === 'owner' ? 'brand' : 'slate'">{{ u.role === 'owner' ? t('role_owner') : t('role_staff') }}</Badge>
+                            </td>
+                            <td v-if="branches?.length" class="td" :data-label="t('branch')">
+                                <select v-if="u.role === 'staff'" :value="u.branch_id ?? ''" @change="setBranch(u, $event.target.value)" class="input !w-auto !py-1.5 text-sm">
+                                    <option value="">{{ t('all_branches') }}</option>
+                                    <option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                                </select>
+                                <span v-else class="text-slate-300">—</span>
                             </td>
                             <td class="td" data-label="">
                                 <button v-if="!u.is_you" @click="remove(u.id)" class="font-semibold text-rose-600 hover:text-rose-500">{{ t('delete') }}</button>

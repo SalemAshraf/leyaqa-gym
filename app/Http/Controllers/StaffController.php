@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\User;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
@@ -31,8 +32,11 @@ class StaffController extends Controller
                     'email' => $u->email,
                     'phone' => $u->phone,
                     'role' => $u->roles->first()?->name,
+                    'branch_id' => $u->branch_id,
+                    'branch' => $u->branch?->name,
                     'is_you' => $u->id === $request->user()->id,
                 ]),
+            'branches' => Branch::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -46,6 +50,7 @@ class StaffController extends Controller
             'phone' => 'nullable|string|max:40',
             'password' => ['required', Password::defaults()],
             'role' => ['required', Rule::in(['owner', 'staff'])],
+            'branch_id' => ['nullable', Rule::exists('branches', 'id')->where('gym_id', $request->user()->gym_id)],
         ]);
 
         $user = User::create([
@@ -54,11 +59,27 @@ class StaffController extends Controller
             'phone' => $data['phone'] ?? null,
             'password' => Hash::make($data['password']),
             'gym_id' => $request->user()->gym_id,
+            'branch_id' => $data['branch_id'] ?? null,
         ]);
 
         $user->assignRole(Role::findByName($data['role']));
 
         return back()->with('success', 'تم إضافة الموظف');
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->guard($request);
+
+        abort_unless($user->gym_id === $request->user()->gym_id, 404);
+
+        $data = $request->validate([
+            'branch_id' => ['nullable', Rule::exists('branches', 'id')->where('gym_id', $request->user()->gym_id)],
+        ]);
+
+        $user->update(['branch_id' => $data['branch_id'] ?? null]);
+
+        return back()->with('success', 'تم تحديث الفرع');
     }
 
     public function destroy(Request $request, User $user)

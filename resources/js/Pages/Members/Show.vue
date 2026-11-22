@@ -10,14 +10,14 @@ import { waLink } from '@/lib/wa';
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
-const props = defineProps({ member: Object, subscriptions: Array, checkIns: Array, plans: Array, currency: String });
+const props = defineProps({ member: Object, subscriptions: Array, checkIns: Array, plans: Array, currency: String, branches: Array });
 const { t, money, num } = useI18n();
 
 const editing = ref(false);
 const editForm = useForm({
     name: props.member.name, phone: props.member.phone, email: props.member.email ?? '',
     gender: props.member.gender ?? '', birthdate: props.member.birthdate ?? '',
-    notes: props.member.notes ?? '', status: props.member.status,
+    notes: props.member.notes ?? '', status: props.member.status, branch_id: props.member.branch_id ?? '',
 });
 
 const paymentForm = useForm({ subscription_id: '', amount: '', method: 'cash', note: '' });
@@ -84,6 +84,7 @@ const waReminder = computed(() => waLink(
                     <div><dt class="text-xs text-slate-400">{{ t('email') }}</dt><dd class="mt-0.5 font-medium text-ink-900"><bdi dir="ltr">{{ member.email ?? '—' }}</bdi></dd></div>
                     <div><dt class="text-xs text-slate-400">{{ t('joined_at') }}</dt><dd class="mt-0.5 font-medium text-ink-900">{{ member.joined_at }}</dd></div>
                     <div><dt class="text-xs text-slate-400">{{ t('status') }}</dt><dd class="mt-0.5"><Badge :tone="member.status === 'active' ? 'green' : 'slate'">{{ member.status === 'active' ? t('member_active') : t('member_inactive') }}</Badge></dd></div>
+                    <div v-if="member.branch"><dt class="text-xs text-slate-400">{{ t('branch') }}</dt><dd class="mt-0.5 text-ink-900">{{ member.branch }}</dd></div>
                     <div v-if="member.notes" class="col-span-full"><dt class="text-xs text-slate-400">{{ t('notes') }}</dt><dd class="mt-0.5 text-ink-900">{{ member.notes }}</dd></div>
                 </dl>
                 <form v-else @submit.prevent="saveEdit" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -98,6 +99,10 @@ const waReminder = computed(() => waLink(
                         <option value="active">{{ t('member_active') }}</option><option value="inactive">{{ t('member_inactive') }}</option>
                     </select>
                     <input v-model="editForm.notes" class="input sm:col-span-3" :placeholder="t('notes')" />
+                    <select v-if="branches?.length" v-model="editForm.branch_id" class="input">
+                        <option value="">{{ t('no_branch') }}</option>
+                        <option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                    </select>
                     <div class="flex gap-2 sm:col-span-3">
                         <button type="submit" class="btn-primary">{{ t('save') }}</button>
                         <button type="button" @click="editing = false" class="btn-secondary">{{ t('cancel') }}</button>

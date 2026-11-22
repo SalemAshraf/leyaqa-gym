@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\Member;
 use App\Models\Plan;
 use Illuminate\Http\Request;
@@ -67,10 +68,15 @@ class MemberController extends Controller
     {
         abort_unless($request->user()->can('members.manage'), 403);
 
-        $query = Member::query()->with(['subscriptions.payments', 'subscriptions.plan']);
+        $query = Member::query()->with(['subscriptions.payments', 'subscriptions.plan', 'branch'])
+            ->visibleTo($request->user());
 
         if ($search = $request->string('search')->trim()->toString()) {
             self::applyNameSearch($query, $search);
+        }
+
+        if ($branchId = $request->integer('branch_id')) {
+            $query->where('branch_id', $branchId);
         }
 
         $members = $query->orderByDesc('created_at')->paginate(20)->through(function (Member $m) {
@@ -82,6 +88,7 @@ class MemberController extends Controller
                 'phone' => $m->phone,
                 'status' => $m->status,
                 'joined_at' => $m->joined_at?->toDateString(),
+                'branch' => $m->branch?->name,
                 'balance' => $m->outstandingBalance(),
                 'current_subscription' => $current ? [
                     'id' => $current->id,
@@ -96,7 +103,11 @@ class MemberController extends Controller
 
         return Inertia::render('Members/Index', [
             'members' => $members,
-            'filters' => ['search' => $request->string('search')->toString()],
+            'branches' => Branch::orderBy('name')->get(['id', 'name']),
+            'filters' => [
+                'search' => $request->string('search')->toString(),
+                'branch_id' => $request->integer('branch_id') ?: null,
+            ],
         ]);
     }
 
@@ -107,6 +118,7 @@ class MemberController extends Controller
         $q = trim((string) $request->query('q', ''));
 
         return Member::query()
+            ->visibleTo($request->user())
             ->where('status', 'active')
             ->when($q !== '', fn ($query) => self::applyNameSearch($query, $q))
             ->orderBy('name')
@@ -125,6 +137,7 @@ class MemberController extends Controller
             'gender' => ['nullable', Rule::in(['male', 'female'])],
             'birthdate' => 'nullable|date',
             'notes' => 'nullable|string|max:2000',
+            'branch_id' => ['nullable', Rule::exists('branches', 'id')->where('gym_id', $request->user()->gym_id)],
         ]);
 
         Member::create($data);
@@ -135,6 +148,8 @@ class MemberController extends Controller
     public function show(Request $request, Member $member)
     {
         abort_unless($request->user()->can('members.manage'), 403);
+        abort_if($request->user()->branch_id && ! $request->user()->hasRole('owner')
+            && $member->branch_id && $member->branch_id !== $request->user()->branch_id, 404);
 
         $member->load(['subscriptions.plan', 'subscriptions.payments', 'checkIns' => fn ($q) => $q->latest('checked_in_at')->limit(20)]);
 
@@ -148,6 +163,8 @@ class MemberController extends Controller
                 'birthdate' => $member->birthdate?->toDateString(),
                 'notes' => $member->notes,
                 'status' => $member->status,
+                'branch_id' => $member->branch_id,
+                'branch' => $member->branch?->name,
                 'joined_at' => $member->joined_at?->toDateString(),
                 'qr_token' => $member->qr_token,
                 'balance' => $member->outstandingBalance(),
@@ -172,6 +189,7 @@ class MemberController extends Controller
                 'method' => $c->method,
             ]),
             'plans' => Plan::where('is_active', true)->orderBy('name')->get(['id', 'name', 'type', 'duration_days', 'sessions_count', 'price']),
+            'branches' => Branch::orderBy('name')->get(['id', 'name']),
             'currency' => $request->user()->gym->currency,
         ]);
     }
@@ -179,6 +197,8 @@ class MemberController extends Controller
     public function update(Request $request, Member $member)
     {
         abort_unless($request->user()->can('members.manage'), 403);
+        abort_if($request->user()->branch_id && ! $request->user()->hasRole('owner')
+            && $member->branch_id && $member->branch_id !== $request->user()->branch_id, 404);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -188,6 +208,7 @@ class MemberController extends Controller
             'birthdate' => 'nullable|date',
             'notes' => 'nullable|string|max:2000',
             'status' => ['required', Rule::in(['active', 'inactive'])],
+            'branch_id' => ['nullable', Rule::exists('branches', 'id')->where('gym_id', $request->user()->gym_id)],
         ]);
 
         $member->update($data);

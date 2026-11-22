@@ -3,7 +3,7 @@ import { computed } from 'vue';
 
 const dict = {
     ar: {
-        app: 'جامد', dashboard: 'الرئيسية', members: 'الأعضاء', plans: 'الباقات', subscriptions: 'الاشتراكات',
+        app: 'جامد', branches: 'الفروع', new_branch: 'فرع جديد', branch: 'الفرع', branch_name: 'اسم الفرع', all_branches: 'كل الفروع', no_branch: 'بدون فرع', no_branches: 'لا توجد فروع بعد', address: 'العنوان', confirm_delete_branch: 'حذف هذا الفرع؟', branches_hint: 'الموظف المرتبط بفرع يرى أعضاء فرعه فقط. المالك يرى كل الفروع.', branch_has_people: 'لا يمكن حذف فرع به أعضاء أو موظفون', dashboard: 'الرئيسية', members: 'الأعضاء', plans: 'الباقات', subscriptions: 'الاشتراكات',
         payments: 'المدفوعات', checkins: 'تسجيل الحضور', staff: 'الفريق', settings: 'الإعدادات', profile: 'حسابي', logout: 'خروج',
         g_daily: 'الشغل اليومي', g_money: 'الاشتراكات والفلوس', g_admin: 'الإدارة',
         language: 'English', save: 'حفظ', cancel: 'إلغاء', delete: 'حذف', edit: 'تعديل', add: 'إضافة', search: 'بحث',
@@ -148,7 +148,7 @@ const dict = {
         reason_no_sessions: 'الحصص خلصت', reason_no_sub: 'لا يوجد اشتراك', reason_upcoming: 'الاشتراك لم يبدأ',
     },
     en: {
-        app: 'Gamed', dashboard: 'Dashboard', members: 'Members', plans: 'Plans', subscriptions: 'Subscriptions',
+        app: 'Gamed', branches: 'Branches', new_branch: 'New branch', branch: 'Branch', branch_name: 'Branch name', all_branches: 'All branches', no_branch: 'No branch', no_branches: 'No branches yet', address: 'Address', confirm_delete_branch: 'Delete this branch?', branches_hint: 'Staff pinned to a branch only see its members. The owner sees all branches.', branch_has_people: 'Cannot delete a branch with members or staff', dashboard: 'Dashboard', members: 'Members', plans: 'Plans', subscriptions: 'Subscriptions',
         payments: 'Payments', checkins: 'Check-in', staff: 'Team', settings: 'Settings', profile: 'My account', logout: 'Log out',
         g_daily: 'Daily work', g_money: 'Subscriptions & money', g_admin: 'Administration',
         language: 'عربي', save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', add: 'Add', search: 'Search',

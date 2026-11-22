@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToGym;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -13,7 +14,7 @@ class Member extends Model
     use BelongsToGym, HasFactory;
 
     protected $fillable = [
-        'name', 'phone', 'email', 'gender', 'birthdate', 'notes', 'status', 'joined_at',
+        'name', 'phone', 'email', 'gender', 'birthdate', 'notes', 'status', 'joined_at', 'branch_id',
     ];
 
     protected $casts = [
@@ -31,6 +32,22 @@ class Member extends Model
                 $member->joined_at = now()->toDateString();
             }
         });
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Staff pinned to a branch only see that branch's members (and members
+     * without a branch). Owners and unpinned users see everyone.
+     */
+    public function scopeVisibleTo($query, User $user): void
+    {
+        if ($user->branch_id && ! $user->hasRole('owner')) {
+            $query->where(fn ($q) => $q->where('branch_id', $user->branch_id)->orWhereNull('branch_id'));
+        }
     }
 
     public function subscriptions(): HasMany

@@ -20,6 +20,7 @@ const paths = {
     chart: 'M4 20V10m6 10V4m6 16v-7m4 7H2',
     classes: 'M8 2v3m8-3v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm4 8h4m-4 4h7',
     qr: 'M4 4h5v5H4V4Zm11 0h5v5h-5V4ZM4 15h5v5H4v-5Zm11 1h2v2h-2v-2Zm3 3h2v2h-2v-2Zm-3 1h2v2h-2v-2Zm1-5h4v1h-4v-1Z',
+    branches: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h.01M15 11h.01',
 };
 </script>
 <template>

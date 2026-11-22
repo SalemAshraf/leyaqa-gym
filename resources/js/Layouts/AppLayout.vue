@@ -33,6 +33,7 @@ const groups = computed(() => {
     if (can('plans.manage')) money.push({ r: 'plans.index', k: 'plans', icon: 'plans', match: 'plans.*' });
     if (money.length) g.push({ k: 'g_money', items: money });
     const admin = [];
+    if (can('gym.manage')) admin.push({ r: 'branches.index', k: 'branches', icon: 'branches', match: 'branches.*' });
     if (can('staff.manage')) admin.push({ r: 'staff.index', k: 'staff', icon: 'staff', match: 'staff.*' });
     if (can('gym.manage')) admin.push({ r: 'settings.edit', k: 'settings', icon: 'settings', match: 'settings.*' });
     if (admin.length) g.push({ k: 'g_admin', items: admin });

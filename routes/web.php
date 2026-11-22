@@ -74,8 +74,10 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
 
+    Route::resource('branches', \App\Http\Controllers\BranchController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('staff', [StaffController::class, 'index'])->name('staff.index');
     Route::post('staff', [StaffController::class, 'store'])->name('staff.store');
+    Route::put('staff/{user}', [StaffController::class, 'update'])->name('staff.update');
     Route::delete('staff/{user}', [StaffController::class, 'destroy'])->name('staff.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -7,15 +7,16 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ members: Object, filters: Object, currency: String });
+const props = defineProps({ members: Object, filters: Object, currency: String, branches: Array });
 const { t, money, num } = useI18n();
 
 const search = ref(props.filters?.search ?? '');
+const branchId = ref(props.filters?.branch_id ?? '');
 const showForm = ref(false);
-const form = useForm({ name: '', phone: '', email: '', gender: '', birthdate: '', notes: '' });
+const form = useForm({ name: '', phone: '', email: '', gender: '', birthdate: '', notes: '', branch_id: '' });
 
 function doSearch() {
-    router.get(route('members.index'), { search: search.value || undefined }, { preserveState: true });
+    router.get(route('members.index'), { search: search.value || undefined, branch_id: branchId.value || undefined }, { preserveState: true });
 }
 
 function submit() {
@@ -48,6 +49,12 @@ function submit() {
                     </Field>
                     <Field :label="t('birthdate')" :error="form.errors.birthdate"><input v-model="form.birthdate" type="date" class="input" /></Field>
                     <Field :label="t('notes')" :error="form.errors.notes"><input v-model="form.notes" class="input" /></Field>
+                    <Field v-if="branches?.length" :label="t('branch')" :error="form.errors.branch_id">
+                        <select v-model="form.branch_id" class="input">
+                            <option value="">{{ t('no_branch') }}</option>
+                            <option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                        </select>
+                    </Field>
                 </div>
                 <div class="mt-4 flex gap-2">
                     <button type="submit" :disabled="form.processing" class="btn-primary">{{ t('save') }}</button>
@@ -55,8 +62,12 @@ function submit() {
                 </div>
             </form>
 
-            <form @submit.prevent="doSearch" class="flex gap-2">
-                <input v-model="search" :placeholder="t('search_ph')" class="input" />
+            <form @submit.prevent="doSearch" class="flex flex-wrap gap-2">
+                <input v-model="search" :placeholder="t('search_ph')" class="input !w-auto flex-1" />
+                <select v-if="branches?.length" v-model="branchId" class="input !w-auto" @change="doSearch">
+                    <option value="">{{ t('all_branches') }}</option>
+                    <option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                </select>
                 <button type="submit" class="btn-secondary">{{ t('search') }}</button>
             </form>
 
@@ -66,6 +77,7 @@ function submit() {
                         <tr class="border-b border-slate-100">
                             <th class="th">{{ t('member_name') }}</th>
                             <th class="th">{{ t('phone') }}</th>
+                            <th v-if="branches?.length" class="th">{{ t('branch') }}</th>
                             <th class="th">{{ t('current_sub') }}</th>
                             <th class="th">{{ t('status') }}</th>
                             <th class="th">{{ t('balance') }}</th>
@@ -77,6 +89,7 @@ function submit() {
                                 <Link :href="route('members.show', m.id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ m.name }}</Link>
                             </td>
                             <td class="td" :data-label="t('phone')"><bdi dir="ltr">{{ m.phone }}</bdi></td>
+                            <td v-if="branches?.length" class="td" :data-label="t('branch')"><span class="text-slate-500">{{ m.branch || '—' }}</span></td>
                             <td class="td" :data-label="t('current_sub')">
                                 <span v-if="m.current_subscription">
                                     {{ m.current_subscription.plan }}

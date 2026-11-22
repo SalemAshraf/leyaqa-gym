@@ -14,6 +14,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password', 'gym_id', 'phone', 'locale',
+            'branch_id',
     ];
 
     protected $hidden = [
@@ -26,6 +27,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function gym(): BelongsTo

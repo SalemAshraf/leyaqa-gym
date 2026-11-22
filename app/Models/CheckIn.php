@@ -11,7 +11,7 @@ class CheckIn extends Model
 {
     use BelongsToGym, HasFactory;
 
-    protected $fillable = ['member_id', 'checked_in_at', 'method', 'result', 'denial_reason'];
+    protected $fillable = ['member_id', 'branch_id', 'checked_in_at', 'method', 'result', 'denial_reason'];
 
     protected $casts = [
         'checked_in_at' => 'datetime',
@@ -20,5 +20,10 @@ class CheckIn extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 }
