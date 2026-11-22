@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    // Member reminders delivery. 'log' sends nothing externally; real
+    // delivery needs the owner's own provider credentials.
+    'messaging' => [
+        'driver' => env('MESSAGING_DRIVER', 'log'),
+    ],
+
+    'whatsapp' => [
+        'token' => env('WHATSAPP_CLOUD_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_CLOUD_PHONE_NUMBER_ID'),
+    ],
+
 ];

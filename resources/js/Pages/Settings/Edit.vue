@@ -2,9 +2,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Field from '@/Components/Field.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ gym: Object, currencies: Array, ai: Object });
+const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object });
 const { t } = useI18n();
 
 const form = useForm({
@@ -24,6 +25,11 @@ function showSetupGuide() {
 
 function toggleAi() {
     router.patch(route('settings.ai'), { enabled: ! props.ai.enabled }, { preserveScroll: true });
+}
+
+const reminderDays = ref(props.reminders.days_before);
+function saveReminders(enabled) {
+    router.patch(route('settings.reminders'), { enabled, days_before: reminderDays.value }, { preserveScroll: true });
 }
 
 function disconnect(family) {
@@ -91,6 +97,22 @@ function disconnect(family) {
                     </div>
                     <p v-else class="text-sm text-slate-500">{{ t('ai_no_connections') }}</p>
                 </template>
+            </div>
+
+            <div class="card space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-ink-900">{{ t('reminders_title') }}</div>
+                        <p class="text-sm text-slate-500">{{ t('reminders_desc') }}</p>
+                    </div>
+                    <button @click="saveReminders(!reminders.enabled)" class="btn-sm whitespace-nowrap" :class="reminders.enabled ? 'btn-primary' : 'btn-secondary'">
+                        {{ reminders.enabled ? t('ai_on') : t('ai_off') }}
+                    </button>
+                </div>
+                <div v-if="reminders.enabled" class="flex items-center gap-3 text-sm">
+                    <label class="text-slate-600">{{ t('reminders_days') }}</label>
+                    <input v-model.number="reminderDays" type="number" min="1" max="14" class="input w-24" @change="saveReminders(true)" />
+                </div>
             </div>
 
             <div class="card flex items-center justify-between gap-3">

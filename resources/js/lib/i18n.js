@@ -103,7 +103,7 @@ const dict = {
         oa_egress: 'الردود تُرسل لتطبيق الطرف الثالث (مثل Claude). راجع سياسة الخصوصية الخاصة به قبل الموافقة.', oa_manage: 'يمكنك إلغاء الربط في أي وقت من الإعدادات ← الذكاء الاصطناعي.',
         oa_allow: 'سماح بالقراءة', oa_deny: 'رفض',
         // AI connector: settings card
-        ai_title: 'الذكاء الاصطناعي (Claude)', ai_desc: 'اسأل Claude عن أعضاء جيمك واشتراكاتك وحضورك وإيرادك — قراءة فقط.',
+        ai_title: 'الذكاء الاصطناعي (Claude)', reminders_title: 'تذكيرات الأعضاء التلقائية', reminders_desc: 'تذكير بانتهاء الاشتراك والمستحقات (تُرسَل واتساب بعد ربط مزوّد، وإلا تُسجَّل فقط)', reminders_days: 'ذكّر قبل الانتهاء بـ (أيام):', ai_desc: 'اسأل Claude عن أعضاء جيمك واشتراكاتك وحضورك وإيرادك — قراءة فقط.',
         ai_on: 'مفعّل', ai_off: 'مغلق', ai_how_title: 'طريقة الربط',
         ai_how_1: 'افتح Claude ← Settings ← Connectors ← Add custom connector',
         ai_how_2: 'ضع رابط موقعك متبوعًا بـ /mcp واضغط Connect',
@@ -264,7 +264,7 @@ const dict = {
         oa_egress: 'Answers are sent to the third-party app (e.g. Claude). Review its privacy policy before approving.', oa_manage: 'You can disconnect anytime from Settings - AI.',
         oa_allow: 'Allow read access', oa_deny: 'Deny',
         // AI connector: settings card
-        ai_title: 'AI assistant (Claude)', ai_desc: 'Ask Claude about your members, subscriptions, check-ins and revenue - read-only.',
+        ai_title: 'AI assistant (Claude)', reminders_title: 'Automatic member reminders', reminders_desc: 'Subscription-expiry and balance reminders (sent over WhatsApp once a provider is connected; logged only until then)', reminders_days: 'Remind this many days before expiry:', ai_desc: 'Ask Claude about your members, subscriptions, check-ins and revenue - read-only.',
         ai_on: 'On', ai_off: 'Off', ai_how_title: 'How to connect',
         ai_how_1: 'Open Claude - Settings - Connectors - Add custom connector',
         ai_how_2: 'Paste your site URL followed by /mcp and press Connect',

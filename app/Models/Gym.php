@@ -10,9 +10,9 @@ class Gym extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'phone', 'country', 'currency', 'timezone', 'locale', 'platform_plan_id', 'platform_status', 'trial_ends_at', 'platform_renews_at', 'setup_dismissed_at'];
+    protected $fillable = ['name', 'phone', 'country', 'currency', 'timezone', 'locale', 'platform_plan_id', 'platform_status', 'trial_ends_at', 'platform_renews_at', 'setup_dismissed_at', 'reminders_enabled', 'reminder_days_before'];
 
-    protected $casts = ['trial_ends_at' => 'date', 'platform_renews_at' => 'date', 'setup_dismissed_at' => 'datetime'];
+    protected $casts = ['trial_ends_at' => 'date', 'platform_renews_at' => 'date', 'setup_dismissed_at' => 'datetime', 'reminders_enabled' => 'boolean', 'reminder_days_before' => 'integer'];
 
     /** Days left in the free trial (0 when expired or not trialing). */
     public function trialDaysLeft(): int

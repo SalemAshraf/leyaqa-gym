@@ -32,6 +32,10 @@ class SettingsController extends Controller
             'gym' => $gym->only(['name', 'phone', 'country', 'currency', 'timezone', 'locale']),
             'currencies' => self::CURRENCIES,
             'ai' => ['enabled' => (bool) $gym->ai_enabled, 'connections' => $connections],
+            'reminders' => [
+                'enabled' => (bool) $gym->reminders_enabled,
+                'days_before' => (int) $gym->reminder_days_before,
+            ],
         ]);
     }
 
@@ -48,6 +52,22 @@ class SettingsController extends Controller
         ]);
 
         $request->user()->gym->update($data);
+
+        return back()->with('success', 'تم حفظ الإعدادات');
+    }
+
+    /** Automatic member reminders (expiry + debt). Off until the owner opts in. */
+    public function remindersToggle(Request $request)
+    {
+        abort_unless($request->user()->can('gym.manage'), 403);
+        $data = $request->validate([
+            'enabled' => 'required|boolean',
+            'days_before' => 'required|integer|min:1|max:14',
+        ]);
+        $request->user()->gym->forceFill([
+            'reminders_enabled' => $data['enabled'],
+            'reminder_days_before' => $data['days_before'],
+        ])->save();
 
         return back()->with('success', 'تم حفظ الإعدادات');
     }

@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::post('check-in', [CheckInController::class, 'store'])->name('checkins.store');
 
     Route::patch('settings/ai', [SettingsController::class, 'aiToggle'])->name('settings.ai');
+    Route::patch('settings/reminders', [SettingsController::class, 'remindersToggle'])->name('settings.reminders');
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
 
