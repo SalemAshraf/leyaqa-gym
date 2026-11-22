@@ -1,4 +1,4 @@
-# لياقة (Leyaqa) — Gym & Studio Management SaaS
+# قوّة (Quwa) — Gym # لياقة (Leyaqa) — Gym & Studio Management SaaS Studio Management SaaS
 
 نظام إدارة جيم واستوديوهات للسوق المصري والخليجي: أعضاء، باقات، اشتراكات، تجميد، مدفوعات جزئية، حضور بالـ QR، ولوحة متابعة للريسبشن. واجهة عربية RTL.
 
