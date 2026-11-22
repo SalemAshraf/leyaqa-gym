@@ -111,7 +111,7 @@ const dict = {
         ai_connections: 'التطبيقات المربوطة', ai_connected_at: 'اتربط', ai_last_used: 'آخر استخدام', ai_disconnect: 'فصل',
         ai_disconnect_confirm: 'فصل هذا التطبيق؟ سيتوقف عن قراءة بيانات الجيم فورًا.', ai_no_connections: 'لا توجد تطبيقات مربوطة بعد.',
         // landing AI section
-        la_badge: 'ذكاء اصطناعي', la_title: 'اسأل Claude عن جيمك', la_sub: 'اربط جامد بـ Claude واسأل عن أعضائك واشتراكاتك وحضورك وإيرادك بالعربي، من غير ما تفتح لوحة التحكم.',
+        la_badge: 'ذكاء اصطناعي', la_demo: 'أمثلة توضيحية بأرقام خيالية، مش لقطة حقيقية من Claude', la_title: 'اسأل Claude عن جيمك', la_sub: 'اربط جامد بـ Claude واسأل عن أعضائك واشتراكاتك وحضورك وإيرادك بالعربي، من غير ما تفتح لوحة التحكم.',
         la_q1: 'إيراد الشهر ده لحد دلوقتي؟', la_a1: '٤٨,٣٠٠ ج.م من ٢٤ عملية دفع.',
         la_q2: 'مين اشتراكه بيخلص الأسبوع ده؟', la_a2: '٨ أعضاء — أقربهم أحمد محمد، باقي يومين.',
         la_q3: 'كم عضو نشط دلوقتي؟', la_a3: '٥٢ عضو نشط و٧٧ اشتراك ساري.',
@@ -264,7 +264,7 @@ const dict = {
         ai_connections: 'Connected apps', ai_connected_at: 'Connected', ai_last_used: 'Last used', ai_disconnect: 'Disconnect',
         ai_disconnect_confirm: 'Disconnect this app? It stops reading gym data immediately.', ai_no_connections: 'No apps connected yet.',
         // landing AI section
-        la_badge: 'AI', la_title: 'Ask Claude about your gym', la_sub: 'Connect Gamed to Claude and ask about your members, subscriptions, attendance and revenue, without opening the dashboard.',
+        la_badge: 'AI', la_demo: 'Illustrative examples with fictional numbers, not a real Claude screenshot', la_title: 'Ask Claude about your gym', la_sub: 'Connect Gamed to Claude and ask about your members, subscriptions, attendance and revenue, without opening the dashboard.',
         la_q1: "This month's revenue so far?", la_a1: 'EGP 48,300 from 24 payments.',
         la_q2: 'Whose subscription ends this week?', la_a2: '8 members - soonest is Ahmed Mohamed, 2 days left.',
         la_q3: 'How many active members right now?', la_a3: '52 active members, 77 running subscriptions.',

@@ -114,6 +114,7 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
                             <div class="ms-auto w-fit max-w-[85%] rounded-2xl rounded-tr-sm bg-brand-400 px-4 py-2.5 text-sm font-bold text-[#0B1220] rtl:rounded-tr-2xl rtl:rounded-tl-sm">{{ t(qa[0]) }}</div>
                             <div class="w-fit max-w-[85%] rounded-2xl rounded-tl-sm border border-white/10 bg-white/10 px-4 py-2.5 text-sm text-slate-100 rtl:rounded-tl-2xl rtl:rounded-tr-sm">{{ t(qa[1]) }}</div>
                         </div>
+                        <p class="pt-1 text-center text-[11px] text-slate-400">{{ t('la_demo') }}</p>
                     </div>
                 </div>
             </div>

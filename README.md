@@ -1,117 +1,116 @@
-# جامد (Gamed) — نظام إدارة الجيم والاستوديوهات
+<p align="center">
+  <img src="public/img/brand/gamed-lockup-light.svg" alt="جامد — Gamed" width="260">
+</p>
 
-> **الاسم:** «جامد / Gamed» هو الاسم المعتمد من المالك (2026-11-22). اسم الريبو `leyaqa-gym` يظل كما هو حاليًا.
+<p align="center">
+  <strong>جامد — Gamed</strong><br>
+  Gym management for Arabic-first gyms: members, subscriptions, QR check-in, classes, payments — and a read-only Claude connector.
+</p>
 
-نظام ويب عربي (RTL) لإدارة جيم مستقل أو استوديو: أعضاء، باقات، اشتراكات مع تجميد وتجديد، مدفوعات جزئية ومستحقات، حضور بمسح QR، ولوحة متابعة للريسبشن. مصمم للسوق المصري والخليجي (عملة ومنطقة زمنية حسب الدولة عند التسجيل).
+<p align="center">
+  <a href="#what-this-is">What this is</a> ·
+  <a href="#the-claude-connector">Claude connector</a> ·
+  <a href="#stack">Stack</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#configuration">Configuration</a> ·
+  <a href="#demo-data">Demo data</a>
+</p>
 
-## الحالة
+---
 
-تطوير نشط على main، مغطى بـ 79 اختبارًا آليًا (494 تحققًا). غير منشور على أي خادم بعد، والاستضافة لم تُحدد.
+## What this is
 
-## المزايا المنفذة فعليًا
+Gamed is a multi-tenant gym management system built for independent gyms in Egypt and the Gulf. The reception desk is the home screen: who is active, whose subscription ends this week, who owes money, and who just scanned in.
 
-- **تسجيل جيم جديد:** الاسم والدولة، ويُنشأ حساب المالك والعملة والمنطقة الزمنية تلقائيًا (مصر EGP، السعودية SAR، الإمارات AED، وباقي دول الخليج).
-- **الأعضاء:** بيانات أساسية، بحث بالاسم أو الموبايل، بطاقة عضو برمز QR فريد.
-- **الباقات:** بمدة (أيام) أو بعدد حصص، سعر، أيام تجميد مسموحة، تفعيل/إيقاف.
-- **الاشتراكات:** إنشاء (تاريخ الانتهاء شامل يوم البداية)، تجميد يمدّ تاريخ النهاية ويستهلك من رصيد التجميد، إلغاء تجميد مبكر يعيد الأيام غير المستخدمة، تجديد متسلسل، إلغاء. الحالة الفعلية محسوبة (ساري/مجمّد/منتهي/ملغي).
-- **المدفوعات:** سجلات يدوية يدخلها الموظف (كاش أو تحصيل خارجي)، دفعات جزئية، رصيد متبقٍ لكل اشتراك ولكل عضو، حذف الدفعة للمالك فقط. **ليست معالجة دفع إلكترونية** — تكامل البوابات (Paymob/Fawry لمصر، mada للسعودية) مرحلة لاحقة.
-- **الحضور:** مسح QR أو إدخال رقم العضو، قبول/رفض مع سبب واضح (منتهي، مجمّد، ملغي، انتهت الحصص، لا يوجد اشتراك)، خصم حصة تلقائي من باقات الحصص، وحماية من المسح المكرر: تكرار المسح خلال دقيقتين يعيد النتيجة الأصلية دون سجل مكرر أو خصم ثانٍ. المديونية لا تمنع الدخول لكنها تظهر كتنبيه.
-- **اللوحة الرئيسية:** الأعضاء النشطون، الاشتراكات السارية، حضور ومرفوض اليوم، إيراد الشهر، إجمالي المستحقات، اشتراكات تنتهي خلال 7 أيام، أكبر المدينين، إيراد آخر 6 شهور، حضور اليوم بالساعة، توزيع الباقات.
-- **الحصص وقوائم الانتظار:** جدول أسبوعي (كابتن/يوم/وقت/سعة)، حجز من شاشة الحصص ببحث فوري عن العضو، إلغاء، والحصة المكتملة تستقبل قائمة انتظار تُرقّى تلقائيًا عند إلغاء مقعد محجوز.
-- **العملاء المحتملون (Leads):** تسجيل المهتمين (اسم/موبايل/مصدر/ملاحظات)، حالات (جديد/تم التواصل/تحوّل/مفقود)، وتحويل لعضو بضغطة واحدة دون تكرار.
-- **التقارير:** صفحة تقارير بالإيراد والحضور والاشتراكات المنتهية والمدينين.
-- **بطاقة عضو عامة:** صفحة QR عامة يفتحها العضو من موبايله عند الدخول.
-- **تذكيرات واتساب:** زر يفتح محادثة واتساب من رقم المستخدم برسالة معدّة مسبقًا (لا إرسال آلي).
-- **بحث عربي متسامح:** «احمد» يجد «أحمد» و«سامى» يجد «سامي» في بحث الأعضاء.
-- **واجهة ثنائية اللغة:** عربي RTL وإنجليزي LTR لكل مستخدم على حدة.
-- **دليل إعداد أول مرة:** على اللوحة الرئيسية، 6 خطوات بحالة الجيم الفعلية (إعدادات، أول باقة، أول عضو، أول اشتراك، أول حضور، إضافة موظف) مع شريط تقدم، يختفي عند الاكتمال ويمكن إخفاؤه.
-- **الصلاحيات:** مالك (كل شيء + الإعدادات + الفريق) وموظف ريسبشن (أعضاء/اشتراكات/مدفوعات/حضور دون الباقات والإعدادات)، عبر spatie/laravel-permission.
-- **عزل كامل بين الجيمات:** كل سجل مرتبط بـ `gym_id` عبر global scope، ومغطى باختبارات عزل المستأجرين.
-- **واجهة عربية RTL بالكامل** بخط Cairo، شاملة الترقيم والتنقل، مع تبديل فوري للإنجليزية.
+It is bilingual from the first commit — full Arabic RTL and English interfaces, per-user locale, Arabic-first print and member cards — not a translation layer bolted on afterwards.
 
-## طبقة المنصة (SaaS)
+| | |
+| --- | --- |
+| **Members** | Cards with QR codes, search by name or phone, branches, notes |
+| **Subscriptions** | Duration and session-pack plans, freezes that extend the end date, renewals that chain cleanly, partial payments and per-member balances |
+| **Check-in** | QR scan or member number, accept/deny with the reason, session deduction on packs, debt shown as a warning — never a door lock |
+| **Classes** | Weekly schedule, capacity, waitlists, booking per member |
+| **Money** | Manual payment records (cash / card / wallet / transfer), debtor lists, revenue reports by month, plan and method |
+| **Team** | Owner and receptionist roles; branch-pinned staff see only their own branch |
+| **Leads** | Walk-in leads with follow-up tracking and one-tap conversion to members |
+| **Tenancy** | Every row is scoped to its gym and covered by isolation tests |
 
-التطبيق متعدد المستأجرين ويباع كمنصة للجيمات:
+Billing for gyms themselves is manual by design at this stage: a gym signs up, requests a plan, and the platform owner activates it after payment. Nothing is charged automatically.
 
-- **صفحة هبوط** على `/`: عرض المزايا والأسعار من خطط المنصة (الأسعار غير محددة بعد — «تواصل معنا» حتى يقرر المالك الأرقام، ولا توجد أسعار أو شهادات مختلقة).
-- **اشتراك المنصة لكل جيم:** الحالات (تجريبي/نشط/متأخر/موقوف)، فترة سماح بعد انتهاء الاشتراك المدفوع (`PLATFORM_GRACE_DAYS`)، وعند الانتهاء يُقفل التطبيق على صفحة الاشتراك فقط دون المساس بأي بيانات.
-- **الفترة التجريبية اختيارية الإعداد:** لا تُفعّل ولا تُعلن إلا بعد ضبط `PLATFORM_TRIAL_DAYS`؛ بدونها تسجّل الجيمات نشطة مباشرة.
-- **الفوترة يدوية:** المالك يطلب خطة من صفحة «اشتراك المنصة» فتُسجّل فاتورة معلّقة، ويؤكدها مشرف المنصة بعد مراجعة الدفع. لا خصم آلي ولا بوابة دفع.
-- **إدارة المنصة** على `/platform` لمن تحددهم `PLATFORM_ADMIN_EMAILS`: قائمة الجيمات، تأكيد الدفع، تمديد التجربة، إيقاف/تفعيل.
+## The Claude connector
 
-## التقنيات
+Gyms can connect their own Claude account (Settings → Connectors → Add custom connector) and ask questions in plain Arabic: revenue so far this month, whose subscription ends this week, today's check-ins, the biggest debtors.
 
-| المكوّن | الاختيار |
-|---|---|
-| الخلفية | Laravel 13، PHP ^8.3 |
-| الواجهة | Inertia.js + Vue 3 + Tailwind CSS (Breeze معدّل لعربي RTL) |
-| الصلاحيات | spatie/laravel-permission |
-| قاعدة البيانات | SQLite (افتراضي محلي) / MySQL 8 |
-| الاختبارات | Pest — 79 اختبارًا / 494 تحققًا |
+The connector is **read-only and consent-based**:
 
-بيئة التطوير المستخدمة PHP 8.3.17 CLI (خط أساس تطوير، وليست توصية إصدار إنتاج). الاختبارات خضراء على SQLite وعلى MySQL 8.0.40 (الميغريشنز وكامل المجموعة).
+- An MCP endpoint (`/mcp`) plus OAuth 2.1 with PKCE (S256), dynamic client registration and rotating refresh tokens.
+- The gym owner — and only the owner — approves the connection on an explicit consent page that shows the app, the redirect host, the account and the gym. Staff cannot approve.
+- Eight read tools (`gym_stats`, `search_members`, `get_member`, `expiring_subscriptions`, `list_debtors`, `today_checkins`, `revenue_summary`, `today_classes`). There is no write tool; there is nothing to call one with.
+- Every token call re-checks eligibility: if the connector is switched off, the gym is suspended, or the owner's role is removed, the token stops working.
+- Each gym's data is isolated by a global tenant scope; a token minted for one gym cannot see another gym's rows, and the test suite proves it.
+- Reusing an authorization code or a rotated refresh token revokes the whole connection family. The owner can also disconnect any app from Settings at any time.
 
-## التشغيل محليًا
+The connector is off by default (`ai_enabled`) and answers are sent to the third-party AI app under the user's own account terms with it.
 
-```bash
+## Stack
+
+| | |
+| --- | --- |
+| **Framework** | Laravel 13, PHP 8.3 |
+| **UI** | Inertia.js + Vue 3, Tailwind CSS 4, Cairo font |
+| **i18n** | Arabic (default) and English, RTL/LTR, per-user locale |
+| **Data** | MySQL / MariaDB in production, SQLite for tests and local dev |
+| **Auth & roles** | Laravel auth + email verification, spatie/laravel-permission |
+| **Tests** | Pest, 100 feature tests including tenant isolation and the OAuth/MCP flow |
+
+## Quick start
+
+You need PHP 8.3+, Composer and Node 20+.
+
+```sh
+git clone https://github.com/SalemAshraf/leyaqa-gym.git && cd leyaqa-gym
+cp .env.example .env            # defaults are local + SQLite
 composer install
 npm install
-cp .env.example .env        # DB_CONNECTION=sqlite افتراضيًا
+
 php artisan key:generate
 touch database/database.sqlite
 php artisan migrate
-npm run build               # أو npm run dev أثناء التطوير
+php artisan gym:demo            # optional: one isolated demo gym with synthetic data
+
+npm run build                   # or: npm run dev
 php artisan serve
 ```
 
-بيانات تجريبية (بيئة local فقط):
+The app is on [localhost:8000](http://localhost:8000). Run the tests with `php artisan test`.
 
-```bash
-php artisan db:seed --class=DemoSeeder   # demo@example.com / password
-```
+## Configuration
 
-للتشغيل على MySQL: اضبط `DB_CONNECTION=mysql` وبيانات الاتصال في `.env` ثم `php artisan migrate`.
+Everything beyond the defaults is optional; [`.env.example`](./.env.example) has the full list.
 
-## الاختبارات
+| | |
+| --- | --- |
+| `APP_LOCALE` | Default interface language: `ar` or `en`. |
+| `DB_CONNECTION` | `sqlite` locally; `mysql` with the usual `DB_*` keys in production. |
+| `PLATFORM_ADMIN_EMAILS` | Comma-separated emails allowed into the platform admin area. Unset means no platform admins — the safe direction to fail. |
+| `PLATFORM_TRIAL_DAYS` | If set, new gyms start as `trialing`; if unset, they stay `pending` until the platform owner activates them. |
+| `PLATFORM_GRACE_DAYS` | Grace period after an expired platform subscription before lockout. |
+| `PLATFORM_SALES_WHATSAPP` | Sales contact shown on billing pages, international format without `+`. |
 
-```bash
-php artisan test    # أو: vendor/bin/pest
-```
+New platform plans are managed from the platform admin area, not the environment.
 
-تغطي: عزل المستأجرين، دورة حياة الاشتراك (تجميد/إلغاء تجميد/تجديد/إلغاء)، الدفعات الجزئية والأرصدة، سيناريوهات القبول والرفض عند الحضور، حماية المسح المكرر، الصلاحيات، الحصص والحجز وقوائم الانتظار والترقية التلقائية، تحويل العملاء المحتملين، البحث العربي المتسامح، اتساق المنطقة الزمنية عند حدود اليوم، دورة اشتراك المنصة (تجربة/قفل/دفع/تمديد/إيقاف/سماح)، ودليل الإعداد الأول.
+## Demo data
 
-## إعدادات المنصة (.env)
+`php artisan gym:demo` creates **one** demo gym ("جيم التجمع — بيانات تجريبية") with two logins (owner and reception) and a synthetic dataset: ~50 members, plans, subscriptions in every state, partial payments and debtors, classes, and two weeks of check-ins. All names, phones and payments are fictional.
 
-| المتغير | الوظيفة |
-|---|---|
-| `PLATFORM_TRIAL_DAYS` | طول التجربة بالأيام؛ فارغ = بلا تجربة والتسجيل نشط مباشرة |
-| `PLATFORM_GRACE_DAYS` | سماح الوصول بعد انتهاء الاشتراك المدفوع (افتراضي 7) |
-| `PLATFORM_SALES_WHATSAPP` | رقم واتساب المبيعات بصيغة دولية بدون + |
-| `PLATFORM_ADMIN_EMAILS` | إيميلات مشرفي المنصة مفصولة بفواصل |
+- It is additive and refuses to run if the demo accounts already exist — it never touches existing data.
+- It asks for the demo password on a hidden prompt; leave it empty and it generates one and prints it once.
+- In production it additionally requires `--force`.
 
-## تحديث نسخة قائمة
+## Deployment notes
 
-```bash
-git pull && composer install && npm ci && npm run build && php artisan migrate
-```
+Run migrations on deploy (`php artisan migrate --force`), schedule `php artisan schedule:run` every minute (subscription expiry), and build assets with `npm run build`. The demo command, seeds and `.env` are never part of a production upload.
 
-الميغريشنز إضافية فقط (جداول وأعمدة جديدة) ولا تمس البيانات القائمة؛ لا تستخدم `migrate:fresh` ولا `db:seed` على بيانات حقيقية.
+## License
 
-## خارج النطاق الحالي (خارطة طريق)
-
-1. فروع متعددة لنفس الحساب.
-2. تكاملات الدفع: Paymob/Fawry لمصر، mada للسعودية.
-3. الفوترة الضريبية (ETA لمصر، ZATCA للسعودية) — تبدأ فقط بعد التحقق من الإلزام الفعلي على الشريحة المستهدفة. لا يوجد أي ادعاء جاهزية ضريبية أو امتثال.
-4. أدوار إضافية (مدرّب، محاسب).
-5. تطبيق موبايل للعضو.
-
-## الوثائق
-
-- [docs/market-study.md](docs/market-study.md) — دراسة سوق مصر والخليج الست بالمصادر وتغطية البحث لكل دولة
-- [docs/plan.md](docs/plan.md) — خطة المنتج والمراحل والأسئلة المفتوحة
-- [docs/database.md](docs/database.md) — تصميم قاعدة البيانات وقراراته
-
-## ملاحظات
-
-- مشروع خاص قيد التطوير؛ الريبو خاص.
-- لا تُستخدم بيانات حقيقية في البيئة المحلية؛ DemoSeeder بيانات وهمية للتجربة فقط.
+Proprietary. All rights reserved.
