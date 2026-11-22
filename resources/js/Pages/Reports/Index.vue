@@ -109,7 +109,7 @@ const statusesLabeled = props.statuses.map((r) => ({ ...r, label: t('s_' + r.lab
                             <tr v-for="r in [...revenueByDay].reverse()" :key="r.day" :class="{ 'text-slate-400': r.count === 0 }">
                                 <td class="whitespace-nowrap px-4 py-2"><bdi dir="ltr">{{ r.day }}</bdi></td>
                                 <td class="px-4 py-2">{{ num(r.count) }}</td>
-                                <td class="px-4 py-2 text-end font-semibold"><bdi>{{ money(r.revenue, currency) }}</bdi></td>
+                                <td class="whitespace-nowrap px-4 py-2 text-end font-semibold"><bdi>{{ money(r.revenue, currency) }}</bdi></td>
                             </tr>
                         </tbody>
                     </table>
