@@ -144,4 +144,4 @@ Run migrations on deploy (`php artisan migrate --force`), schedule `php artisan 
 
 ## License
 
-No license has been selected yet; default copyright applies. The owner will choose one before any reuse is permitted.
+No license file is included and no license has been selected yet; that choice is pending the owner.
