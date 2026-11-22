@@ -8,6 +8,13 @@
 </p>
 
 <p align="center">
+  <img alt="PHP 8.3" src="https://img.shields.io/badge/PHP-8.3-777BB4">
+  <img alt="Laravel 13" src="https://img.shields.io/badge/Laravel-13-FF2D20">
+  <img alt="Vue 3 + Inertia" src="https://img.shields.io/badge/Vue_3_%2B_Inertia-frontend-42b883">
+  <img alt="Arabic RTL + English" src="https://img.shields.io/badge/i18n-AR__RTL_%2B_EN-0B1220">
+</p>
+
+<p align="center">
   <a href="#what-this-is">What this is</a> ·
   <a href="#the-claude-connector">Claude connector</a> ·
   <a href="#stack">Stack</a> ·
@@ -37,6 +44,12 @@ It is bilingual from the first commit — full Arabic RTL and English interfaces
 
 Billing for gyms themselves is manual by design at this stage: a gym signs up, requests a plan, and the platform owner activates it after payment. Nothing is charged automatically.
 
+## Screenshots
+
+<p align="center">
+  <img src="public/img/landing-dashboard.png" alt="Gamed dashboard — daily desk view" width="720">
+</p>
+
 ## The Claude connector
 
 Gyms can connect their own Claude account (Settings → Connectors → Add custom connector) and ask questions in plain Arabic: revenue so far this month, whose subscription ends this week, today's check-ins, the biggest debtors.
@@ -62,6 +75,24 @@ The connector is off by default (`ai_enabled`) and answers are sent to the third
 | **Data** | MySQL / MariaDB in production, SQLite for tests and local dev |
 | **Auth & roles** | Laravel auth + email verification, spatie/laravel-permission |
 | **Tests** | Pest, 100 feature tests including tenant isolation and the OAuth/MCP flow |
+
+### Layout
+
+| Path | |
+| --- | --- |
+| `app/Models` | Tenant-scoped models; `BelongsToGym` enforces isolation on every query |
+| `app/Http/Controllers` | Desk features plus `OauthController` and `McpController` for the AI connector |
+| `app/Console/Commands` | `gym:demo` (synthetic demo data) and subscription expiry |
+| `resources/js/Pages` | Inertia pages, Arabic-first, per-user locale |
+| `resources/js/lib/i18n.js` | The full AR/EN string table |
+| `database/migrations` | Additive, migrate-only schema history |
+| `tests/Feature` | Feature tests: tenancy, billing lockout, classes, OAuth/MCP |
+
+### Rules the codebase holds to
+
+- **Every tenant row passes one scope.** `BelongsToGym` filters each query by the signed-in gym and fills `gym_id` on create; the isolation tests try to cross gyms on purpose.
+- **Money is records, not gateways.** Payments are manual desk records with partial amounts and balances; no card is ever charged.
+- **New gyms start locked.** Without platform activation a fresh gym sees only the billing page.
 
 ## Quick start
 
@@ -113,4 +144,4 @@ Run migrations on deploy (`php artisan migrate --force`), schedule `php artisan 
 
 ## License
 
-Proprietary. All rights reserved.
+No license has been selected yet; default copyright applies. The owner will choose one before any reuse is permitted.
