@@ -40,7 +40,9 @@ it('creates classes and books members within capacity', function () {
     $member2 = makeClassMember($gym);
     $this->actingAs($owner)->post("/classes/{$class->id}/bookings", [
         'member_id' => $member2->id, 'class_date' => now()->toDateString(),
-    ])->assertSessionHasErrors();
+    ])->assertSessionHasNoErrors();
+    // Full class: the second member lands on the waitlist, not a booked seat.
+    expect(ClassBooking::where('member_id', $member2->id)->first()->status)->toBe('waitlisted');
 });
 
 it('rejects duplicate, expired-subscription and wrong-weekday bookings', function () {
@@ -110,4 +112,39 @@ it('blocks classes from users without classes.manage and from guests', function 
     $this->get('/classes')->assertRedirect('/login');
     // staff HAS classes.manage (reception runs the booking desk)
     $this->actingAs(makeStaff($gym))->get('/classes')->assertOk();
+});
+
+it('waitlists members when full and promotes the earliest on cancellation', function () {
+    [$gym, $owner] = makeOwner();
+    $class = GymClass::factory()->create(['gym_id' => $gym->id, 'capacity' => 1, 'weekday' => now()->dayOfWeek]);
+    $m1 = makeClassMember($gym);
+    $m2 = makeClassMember($gym);
+    $m3 = makeClassMember($gym);
+    $date = now()->toDateString();
+
+    $this->actingAs($owner)->post("/classes/{$class->id}/bookings", ['member_id' => $m1->id, 'class_date' => $date])
+        ->assertSessionHasNoErrors();
+    // Full now: next bookings join the waitlist instead of being rejected.
+    $this->actingAs($owner)->post("/classes/{$class->id}/bookings", ['member_id' => $m2->id, 'class_date' => $date])
+        ->assertSessionHasNoErrors();
+    $this->actingAs($owner)->post("/classes/{$class->id}/bookings", ['member_id' => $m3->id, 'class_date' => $date])
+        ->assertSessionHasNoErrors();
+
+    expect($class->bookedCount($date))->toBe(1)
+        ->and($class->waitlistCount($date))->toBe(2);
+    expect(ClassBooking::where('member_id', $m2->id)->first()->status)->toBe('waitlisted');
+
+    // Same member cannot join the waitlist twice.
+    $this->actingAs($owner)->post("/classes/{$class->id}/bookings", ['member_id' => $m2->id, 'class_date' => $date])
+        ->assertSessionHasErrors('member_id');
+
+    // Cancelling the booked spot promotes the earliest waitlisted member.
+    $booking1 = ClassBooking::where('member_id', $m1->id)->first();
+    $this->actingAs($owner)->delete("/bookings/{$booking1->id}")->assertSessionHasNoErrors();
+
+    expect(ClassBooking::where('member_id', $m1->id)->first()->status)->toBe('cancelled')
+        ->and(ClassBooking::where('member_id', $m2->id)->first()->status)->toBe('booked')
+        ->and(ClassBooking::where('member_id', $m3->id)->first()->status)->toBe('waitlisted')
+        ->and($class->bookedCount($date))->toBe(1)
+        ->and($class->waitlistCount($date))->toBe(1);
 });

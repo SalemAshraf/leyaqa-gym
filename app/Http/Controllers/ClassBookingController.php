@@ -44,34 +44,49 @@ class ClassBookingController extends Controller
             ->first();
 
         if ($existing) {
-            if ($existing->status !== 'cancelled') {
+            if ($existing->status === 'booked') {
                 throw ValidationException::withMessages(['member_id' => 'العضو محجوز بالفعل']);
             }
-            $existing->update(['status' => 'booked']);
+            if ($existing->status === 'waitlisted') {
+                throw ValidationException::withMessages(['member_id' => 'العضو على قائمة الانتظار بالفعل']);
+            }
+            $existing->update(['status' => $class->hasSpots($date) ? 'booked' : 'waitlisted']);
 
-            return back();
+            return back()->with('success', $existing->status === 'booked' ? 'تم حجز مكان العضو' : 'الحصة مكتملة، أُضيف العضو لقائمة الانتظار');
         }
 
-        if (! $class->hasSpots($date)) {
-            throw ValidationException::withMessages(['member_id' => 'الحصة مكتملة العدد']);
-        }
+        $status = $class->hasSpots($date) ? 'booked' : 'waitlisted';
 
         ClassBooking::create([
             'gym_class_id' => $class->id,
             'member_id' => $member->id,
             'class_date' => $date,
-            'status' => 'booked',
+            'status' => $status,
         ]);
 
-        return back();
+        return back()->with('success', $status === 'booked' ? 'تم حجز مكان العضو' : 'الحصة مكتملة، أُضيف العضو لقائمة الانتظار');
     }
 
     public function destroy(Request $request, ClassBooking $booking)
     {
         abort_unless($request->user()->can('classes.manage'), 403);
 
-        $booking->update(['status' => 'cancelled']);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($booking) {
+            $wasBooked = $booking->status === 'booked';
+            $booking->update(['status' => 'cancelled']);
 
-        return back();
+            if ($wasBooked) {
+                // Promote the earliest waitlisted member into the freed spot.
+                ClassBooking::where('gym_class_id', $booking->gym_class_id)
+                    ->whereDate('class_date', $booking->class_date)
+                    ->where('status', 'waitlisted')
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->first()
+                    ?->update(['status' => 'booked']);
+            }
+        });
+
+        return back()->with('success', 'تم إلغاء الحجز');
     }
 }

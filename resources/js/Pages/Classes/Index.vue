@@ -128,9 +128,9 @@ function cancelBooking(id) {
                     <div class="flex items-center gap-2">
                         <Badge :tone="!c.runs_this_day ? 'slate' : c.booked >= c.capacity ? 'rose' : 'green'">
                             <template v-if="!c.runs_this_day">{{ t('not_today') }}</template>
-                            <template v-else>{{ t('booked_of').replace('{b}', num(c.booked)).replace('{c}', num(c.capacity)) }}<template v-if="c.booked >= c.capacity"> · {{ t('full') }}</template></template>
+                            <template v-else>{{ t('booked_of').replace('{b}', num(c.booked)).replace('{c}', num(c.capacity)) }}<template v-if="c.booked >= c.capacity"> · {{ t('full') }}</template><template v-if="c.waitlisted"> · +{{ num(c.waitlisted) }} {{ t('waitlist') }}</template></template>
                         </Badge>
-                        <button v-if="c.runs_this_day && c.is_active" @click="openBooking(c)" class="btn-secondary btn-sm">{{ t('book_member') }}</button>
+                        <button v-if="c.runs_this_day && c.is_active" @click="openBooking(c)" class="btn-secondary btn-sm">{{ c.booked >= c.capacity ? t('join_waitlist') : t('book_member') }}</button>
                         <button @click="edit(c)" class="text-sm font-semibold text-brand-700 hover:text-brand-600">{{ t('edit') }}</button>
                         <button v-if="!c.booked" @click="removeClass(c)" class="text-sm font-semibold text-rose-600 hover:text-rose-500">{{ t('delete') }}</button>
                     </div>
@@ -148,7 +148,10 @@ function cancelBooking(id) {
 
                 <ul v-if="c.runs_this_day && c.bookings.length" class="divide-y divide-slate-100 border-t border-slate-100">
                     <li v-for="b in c.bookings" :key="b.id" class="flex items-center justify-between px-5 py-2.5 text-sm">
-                        <span class="font-medium text-ink-900">{{ b.member }} <bdi class="text-slate-400" dir="ltr">{{ b.phone }}</bdi></span>
+                        <span class="font-medium text-ink-900">
+                            {{ b.member }} <bdi class="text-slate-400" dir="ltr">{{ b.phone }}</bdi>
+                            <Badge v-if="b.status === 'waitlisted'" tone="amber" class="ms-1">{{ t('waitlisted') }}</Badge>
+                        </span>
                         <button @click="cancelBooking(b.id)" class="text-xs font-semibold text-rose-600 hover:text-rose-500">{{ t('booking_cancel') }}</button>
                     </li>
                 </ul>

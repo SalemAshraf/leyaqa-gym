@@ -25,6 +25,11 @@ class GymClass extends Model
         return $this->bookings()->whereDate('class_date', $date)->where('status', 'booked')->count();
     }
 
+    public function waitlistCount(string $date): int
+    {
+        return $this->bookings()->whereDate('class_date', $date)->where('status', 'waitlisted')->count();
+    }
+
     public function hasSpots(string $date): bool
     {
         return $this->bookedCount($date) < $this->capacity;

@@ -31,11 +31,15 @@ class ClassController extends Controller
                 'is_active' => $c->is_active,
                 'runs_this_day' => $c->weekday === $weekday,
                 'booked' => $c->bookings->where('status', 'booked')->count(),
-                'bookings' => $c->bookings->where('status', 'booked')->map(fn ($b) => [
-                    'id' => $b->id,
-                    'member' => $b->member->name,
-                    'phone' => $b->member->phone,
-                ])->values(),
+                'waitlisted' => $c->bookings->where('status', 'waitlisted')->count(),
+                'bookings' => $c->bookings->whereIn('status', ['booked', 'waitlisted'])
+                    ->sortBy(fn ($b) => $b->status === 'booked' ? 0 : 1)
+                    ->map(fn ($b) => [
+                        'id' => $b->id,
+                        'member' => $b->member->name,
+                        'phone' => $b->member->phone,
+                        'status' => $b->status,
+                    ])->values(),
             ]);
 
         return Inertia::render('Classes/Index', [
