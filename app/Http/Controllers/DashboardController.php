@@ -34,6 +34,7 @@ class DashboardController extends Controller
                 'id' => $s->id,
                 'member_id' => $s->member->id,
                 'member' => $s->member->name,
+                'phone' => $s->member->phone,
                 'plan' => $s->plan->name,
                 'ends_at' => $s->ends_at->toDateString(),
                 'days_left' => $s->daysLeft($today),

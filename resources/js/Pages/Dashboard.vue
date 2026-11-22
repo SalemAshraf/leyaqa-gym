@@ -6,6 +6,8 @@ import BarList from '@/Components/BarList.vue';
 import Badge from '@/Components/Badge.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from '@/lib/i18n';
+import { waLink } from '@/lib/wa';
+import { usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     stats: Object,
@@ -19,7 +21,10 @@ const props = defineProps({
 });
 
 const { t, money, num, date } = useI18n();
-const revenueSeries = props.revenueTrend.map((r) => r.revenue);
+const gymCountry = usePage().props.gym?.country;
+const expiryWa = (row) => waLink(row.phone, gymCountry, t('wa_expiry')
+    .replace('{name}', row.member)
+    .replace('{when}', row.days_left === 0 ? t('ends_today').toLowerCase() : t('days_left').replace('{n}', row.days_left)));
 </script>
 
 <template>
@@ -66,7 +71,10 @@ const revenueSeries = props.revenueTrend.map((r) => r.revenue);
                                 <Link :href="route('members.show', row.member_id)" class="font-semibold text-ink-900 hover:text-brand-700">{{ row.member }}</Link>
                                 <span class="truncate text-slate-500"> · {{ row.plan }}</span>
                             </div>
-                            <Badge tone="amber">{{ row.days_left === 0 ? t('ends_today') : t('days_left').replace('{n}', num(row.days_left)) }}</Badge>
+                            <span class="flex shrink-0 items-center gap-2">
+                                <a :href="expiryWa(row)" target="_blank" rel="noopener" class="text-xs font-semibold text-[#128C7E] hover:underline">{{ t('wa_remind') }}</a>
+                                <Badge tone="amber">{{ row.days_left === 0 ? t('ends_today') : t('days_left').replace('{n}', num(row.days_left)) }}</Badge>
+                            </span>
                         </li>
                     </ul>
                 </div>

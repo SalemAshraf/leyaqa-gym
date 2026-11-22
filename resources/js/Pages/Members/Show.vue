@@ -6,6 +6,9 @@ import Field from '@/Components/Field.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
+import { waLink } from '@/lib/wa';
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 const props = defineProps({ member: Object, subscriptions: Array, checkIns: Array, plans: Array, currency: String });
 const { t, money, num } = useI18n();
@@ -46,6 +49,14 @@ function act(action, subId, data = {}) {
 }
 
 const freezeDays = ref({});
+
+const gym = computed(() => usePage().props.gym);
+const cardUrl = computed(() => route('card', props.member.qr_token));
+const waReminder = computed(() => waLink(
+    props.member.phone,
+    gym.value?.country,
+    t('wa_payment').replace('{name}', props.member.name).replace('{balance}', money(props.member.balance, props.currency))
+));
 </script>
 
 <template>
@@ -54,9 +65,13 @@ const freezeDays = ref({});
         <div class="space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h2 class="text-xl font-bold text-ink-900">{{ member.name }}</h2>
-                <Badge v-if="member.balance > 0" tone="rose" class="!px-3 !py-1.5 !text-sm">
-                    {{ t('has_balance') }}: <bdi>{{ money(member.balance, currency) }}</bdi>
-                </Badge>
+                <span class="flex flex-wrap items-center gap-2">
+                    <a :href="cardUrl" target="_blank" class="btn-secondary btn-sm">{{ t('open_card') }}</a>
+                    <a v-if="member.balance > 0" :href="waReminder" target="_blank" rel="noopener" class="btn-secondary btn-sm !text-[#128C7E]">{{ t('wa_remind') }}</a>
+                    <Badge v-if="member.balance > 0" tone="rose" class="!px-3 !py-1.5 !text-sm">
+                        {{ t('has_balance') }}: <bdi>{{ money(member.balance, currency) }}</bdi>
+                    </Badge>
+                </span>
             </div>
 
             <div class="card">

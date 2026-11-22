@@ -21,6 +21,7 @@ const groups = computed(() => {
     const g = [];
     const daily = [];
     if (can('reports.view')) daily.push({ r: 'dashboard', k: 'dashboard', icon: 'dashboard' });
+    if (can('reports.view')) daily.push({ r: 'reports', k: 'reports', icon: 'reports' });
     if (can('checkins.manage')) daily.push({ r: 'checkins.index', k: 'checkins', icon: 'checkins', match: 'checkins.*' });
     if (can('members.manage')) daily.push({ r: 'members.index', k: 'members', icon: 'members', match: 'members.*' });
     if (daily.length) g.push({ k: 'g_daily', items: daily });

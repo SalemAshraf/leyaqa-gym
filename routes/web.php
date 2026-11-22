@@ -21,6 +21,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('reports', \App\Http\Controllers\ReportsController::class)->name('reports');
 
     Route::resource('members', MemberController::class)->only(['index', 'store', 'show', 'update']);
     Route::resource('plans', PlanController::class)->only(['index', 'store', 'update']);
@@ -52,5 +53,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('locale', \App\Http\Controllers\LocaleController::class)->name('locale');
+Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('card');
 
 require __DIR__.'/auth.php';

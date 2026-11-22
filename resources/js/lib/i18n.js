@@ -71,6 +71,12 @@ const dict = {
         email_unverified: 'بريدك الإلكتروني لسه مش متأكد.', resend_verification: 'إعادة إرسال رابط التأكيد',
         // validation / flash
         payment_deleted: 'اتحذفت الدفعة', member_saved: 'اتحفظ العضو', sub_created: 'اتعمل الاشتراك',
+        open_card: 'بطاقة العضو', wa_remind: 'تذكير واتساب',
+        wa_payment: 'أهلًا {name}، تذكير من الجيم: عندك مستحقات بقيمة {balance}. متاح الدفع عند الريسبشن. شكرًا!',
+        wa_expiry: 'أهلًا {name}، اشتراكك في الجيم بينتهي {when}. جدد قبل الانتهاء عشان تفضل داخلك مفتوح. شكرًا!',
+                reports: 'التقارير', rep_revenue_prev: 'إيراد الشهر الماضي', rep_members_new: 'أعضاء جدد هذا الشهر', rep_checkins_month: 'حضور هذا الشهر',
+        rep_revenue_year: 'الإيراد آخر ١٢ شهر', rep_checkins_30: 'الحضور آخر ٣٠ يوم', rep_by_method: 'مدفوعات الشهر حسب الطريقة',
+        rep_new_members: 'أعضاء جدد حسب الشهر', rep_statuses: 'الاشتراكات حسب الحالة',
         // increment-1 additions
         choose_plan: 'اختار الباقة', close: 'إغلاق', confirm: 'تأكيد',
         confirm_delete_payment: 'حذف الدفعة؟ لا يمكن التراجع.', confirm_delete_staff: 'حذف هذا الموظف؟',
@@ -147,6 +153,12 @@ const dict = {
         delete_account: 'Delete account', delete_account_hint: 'Deleting your account is permanent and cannot be undone.', confirm_delete_account: 'Delete your account permanently?',
         email_unverified: 'Your email address is not verified.', resend_verification: 'Resend verification email',
         payment_deleted: 'Payment deleted', member_saved: 'Member saved', sub_created: 'Subscription created',
+        open_card: 'Member card', wa_remind: 'WhatsApp reminder',
+        wa_payment: 'Hi {name}, a reminder from the gym: you have an outstanding balance of {balance}. You can pay at the front desk. Thank you!',
+        wa_expiry: 'Hi {name}, your gym subscription ends {when}. Renew before it ends so your access stays open. Thank you!',
+                reports: 'Reports', rep_revenue_prev: 'Revenue last month', rep_members_new: 'New members this month', rep_checkins_month: 'Check-ins this month',
+        rep_revenue_year: 'Revenue, last 12 months', rep_checkins_30: 'Check-ins, last 30 days', rep_by_method: "This month's payments by method",
+        rep_new_members: 'New members by month', rep_statuses: 'Subscriptions by status',
         // increment-1 additions
         choose_plan: 'Choose a plan', close: 'Close', confirm: 'Confirm',
         confirm_delete_payment: 'Delete this payment? This cannot be undone.', confirm_delete_staff: 'Delete this staff member?',
