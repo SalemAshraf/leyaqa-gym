@@ -103,4 +103,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('locale', \App\Http\Controllers\LocaleController::class)->name('locale');
 Route::get('card/{token}', \App\Http\Controllers\CardController::class)->name('card');
 
+// Member self-service portal (private portal_token link; no login needed).
+Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'show'])->name('portal.show');
+Route::post('my/{token}/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
+Route::delete('my/{token}/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
+
 require __DIR__.'/auth.php';

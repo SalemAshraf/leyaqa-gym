@@ -168,6 +168,7 @@ class MemberController extends Controller
                 'branch' => $member->branch?->name,
                 'joined_at' => $member->joined_at?->toDateString(),
                 'qr_token' => $member->qr_token,
+                'portal_url' => $member->portalUrl(),
                 'balance' => $member->outstandingBalance(),
             ],
             'subscriptions' => $member->subscriptions->sortByDesc('starts_at')->values()->map(fn ($s) => [

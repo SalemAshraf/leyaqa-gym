@@ -52,6 +52,12 @@ const freezeDays = ref({});
 
 const gym = computed(() => usePage().props.gym);
 const cardUrl = computed(() => route('card', props.member.qr_token));
+const portalCopied = ref(false);
+async function copyPortal() {
+    await navigator.clipboard.writeText(props.member.portal_url);
+    portalCopied.value = true;
+    setTimeout(() => (portalCopied.value = false), 2000);
+}
 const waReminder = computed(() => waLink(
     props.member.phone,
     gym.value?.country,
@@ -67,6 +73,7 @@ const waReminder = computed(() => waLink(
                 <h2 class="text-xl font-bold text-ink-900">{{ member.name }}</h2>
                 <span class="flex flex-wrap items-center gap-2">
                     <a :href="cardUrl" target="_blank" class="btn-secondary btn-sm">{{ t('open_card') }}</a>
+                    <button type="button" class="btn-secondary btn-sm" @click="copyPortal">{{ portalCopied ? t('portal_copied') : t('copy_portal') }}</button>
                     <a v-if="member.balance > 0" :href="waReminder" target="_blank" rel="noopener" class="btn-secondary btn-sm !text-[#128C7E]">{{ t('wa_remind') }}</a>
                     <Badge v-if="member.balance > 0" tone="rose" class="!px-3 !py-1.5 !text-sm">
                         {{ t('has_balance') }}: <bdi>{{ money(member.balance, currency) }}</bdi>

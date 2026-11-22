@@ -28,6 +28,9 @@ class Member extends Model
             if (empty($member->qr_token)) {
                 $member->qr_token = (string) Str::uuid();
             }
+            if (empty($member->portal_token)) {
+                $member->portal_token = (string) Str::uuid();
+            }
             if (empty($member->joined_at)) {
                 $member->joined_at = now()->toDateString();
             }
@@ -63,6 +66,15 @@ class Member extends Model
     public function checkIns(): HasMany
     {
         return $this->hasMany(CheckIn::class);
+    }
+
+    /**
+     * Private self-service link for the member (subscription, debt,
+     * class booking). Separate from the public door-scanner card link.
+     */
+    public function portalUrl(): string
+    {
+        return route('portal.show', $this->portal_token);
     }
 
     public function currentSubscription(): ?Subscription

@@ -11,7 +11,7 @@ class ClassBooking extends Model
 {
     use BelongsToGym, HasFactory;
 
-    protected $fillable = ['gym_class_id', 'member_id', 'class_date', 'status'];
+    protected $fillable = ['gym_id', 'gym_class_id', 'member_id', 'class_date', 'status'];
 
     protected $casts = ['class_date' => 'date'];
 
