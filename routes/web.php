@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::patch('settings/reminders', [SettingsController::class, 'remindersToggle'])->name('settings.reminders');
     Route::patch('settings/portal-link', [SettingsController::class, 'portalLinkSave'])->name('settings.portal-link');
     Route::patch('settings/renewal-invoices', [SettingsController::class, 'renewalInvoicesToggle'])->name('settings.renewal-invoices');
+    Route::patch('settings/commission', [SettingsController::class, 'commissionSave'])->name('settings.commission');
     Route::get('settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
 
@@ -133,6 +134,7 @@ Route::middleware('private.headers')->group(function () {
         Route::post('my/bookings', [\App\Http\Controllers\MemberPortalBookingController::class, 'store'])->middleware('throttle:30,1')->name('portal.bookings.store');
         Route::delete('my/bookings/{bookingId}', [\App\Http\Controllers\MemberPortalBookingController::class, 'destroy'])->middleware('throttle:30,1')->name('portal.bookings.destroy');
     });
+    Route::post('my/{token}/exchange', [\App\Http\Controllers\MemberPortalController::class, 'consumeExchange'])->middleware('throttle:10,1')->name('portal.exchange.consume');
     // Last: the {token} exchange must not shadow the literal routes above.
     Route::get('my/{token}', [\App\Http\Controllers\MemberPortalController::class, 'exchange'])->name('portal.exchange');
 });

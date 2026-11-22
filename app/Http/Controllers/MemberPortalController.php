@@ -25,19 +25,37 @@ class MemberPortalController extends Controller
      */
     public function exchange(Request $request, string $token)
     {
+        // A live session always wins, whatever state the link is in.
+        $existing = $request->session()->get('member_portal_session_id');
+        $existing = $existing ? MemberPortalSession::find($existing) : null;
+        if ($existing?->isValid()) {
+            return redirect()->route('portal.show');
+        }
+
+        // A GET never consumes the bootstrap: chat link previews and security
+        // scanners fetch shared URLs, and that must not burn the one-time
+        // credential before the member intentionally signs in. The member
+        // confirms with the explicit POST below.
         $member = Member::findByPortalToken($token);
-
         if (! $member) {
-            $existing = $request->session()->get('member_portal_session_id');
-            $existing = $existing ? MemberPortalSession::find($existing) : null;
-            if ($existing?->isValid()) {
-                return redirect()->route('portal.show');
-            }
-
             return redirect()->route('portal.expired');
         }
 
-        $member->consumePortalToken();
+        return Inertia::render('MemberLinkConfirm', [
+            'gym_name' => $member->gym?->name,
+            'token' => $token,
+        ]);
+    }
+
+    /** Explicit member intent: consume the single-use bootstrap (atomic). */
+    public function consumeExchange(Request $request, string $token)
+    {
+        $member = Member::exchangePortalToken($token);
+
+        if (! $member) {
+            return redirect()->route('portal.expired');
+        }
+
         [$portalSession] = MemberPortalSession::mint($member, 'web');
         $request->session()->put('member_portal_session_id', $portalSession->id);
 

@@ -5,7 +5,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { useI18n } from '@/lib/i18n';
 
-const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object, portal_link_days: Number, renewal_invoices_enabled: Boolean });
+const props = defineProps({ gym: Object, currencies: Array, ai: Object, reminders: Object, portal_link_days: Number, renewal_invoices_enabled: Boolean, commission: Object });
 const { t } = useI18n();
 
 const form = useForm({
@@ -37,6 +37,11 @@ function savePortalLink() {
 }
 function saveReminders(enabled) {
     router.patch(route('settings.reminders'), { enabled, days_before: reminderDays.value }, { preserveScroll: true });
+}
+const commissionEnabled = ref(props.commission.enabled);
+const commissionPercent = ref(props.commission.pt_percent);
+function saveCommission() {
+    router.patch(route('settings.commission'), { enabled: commissionEnabled.value, pt_percent: commissionPercent.value }, { preserveScroll: true });
 }
 
 function disconnect(family) {
@@ -142,6 +147,23 @@ function disconnect(family) {
                     <button @click="toggleRenewalInvoices" class="btn-sm whitespace-nowrap" :class="renewal_invoices_enabled ? 'btn-primary' : 'btn-secondary'">
                         {{ renewal_invoices_enabled ? t('ai_on') : t('ai_off') }}
                     </button>
+                </div>
+            </div>
+
+            <div class="card space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-ink-900">{{ t('comm_title') }}</div>
+                        <p class="text-sm text-slate-500">{{ t('comm_desc') }}</p>
+                    </div>
+                    <button @click="commissionEnabled = !commissionEnabled; saveCommission()" class="btn-sm whitespace-nowrap" :class="commissionEnabled ? 'btn-primary' : 'btn-secondary'">
+                        {{ commissionEnabled ? t('ai_on') : t('ai_off') }}
+                    </button>
+                </div>
+                <div v-if="commissionEnabled" class="flex items-center gap-3 text-sm">
+                    <label class="text-slate-600">{{ t('comm_percent') }}</label>
+                    <input v-model.number="commissionPercent" type="number" min="0" max="100" step="0.5" class="input w-24" dir="ltr">
+                    <button @click="saveCommission" class="btn-secondary btn-sm">{{ t('save') }}</button>
                 </div>
             </div>
 

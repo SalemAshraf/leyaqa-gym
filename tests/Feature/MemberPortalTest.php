@@ -23,7 +23,8 @@ function portalMember(array $subOver = []): array
 
 function portalExchange($t, string $plain): void
 {
-    $t->get("/my/{$plain}")->assertRedirect(route('portal.show'));
+    $t->get("/my/{$plain}")->assertOk();
+    $t->post("/my/{$plain}/exchange")->assertRedirect(route('portal.show'));
 }
 
 it('stores only a hash and never serves the stored value as a link', function () {
@@ -50,6 +51,25 @@ it('shows the member their subscription and balance on the private portal', func
         ->has('days')
         ->missing('token')
     );
+});
+
+it('never consumes the bootstrap on GET, so link previews stay harmless', function () {
+    [, $member, , $plain] = portalMember();
+
+    // A scanner or chat preview can fetch the link repeatedly; the member can
+    // still sign in afterwards.
+    $this->get("/my/{$plain}")->assertOk()->assertInertia(fn ($page) => $page->component('MemberLinkConfirm'));
+    $this->get("/my/{$plain}")->assertOk();
+    portalExchange($this, $plain);
+    $this->get('/my')->assertOk();
+});
+
+it('refuses a replayed consume, even back to back', function () {
+    [, $member, , $plain] = portalMember();
+
+    $this->post("/my/{$plain}/exchange")->assertRedirect(route('portal.show'));
+    $this->flushSession();
+    $this->post("/my/{$plain}/exchange")->assertRedirect(route('portal.expired'));
 });
 
 it('makes every bootstrap link single-use', function () {
@@ -120,12 +140,14 @@ it('waitlists a full class and promotes on cancel, self-service included', funct
 
     portalExchange($this, $plain1);
     $this->post('/my/bookings', ['class_id' => $class->id, 'class_date' => $date]);
+    $this->flushSession(); // m2 signs in on their own device
     portalExchange($this, $plain2);
     $this->post('/my/bookings', ['class_id' => $class->id, 'class_date' => $date]);
     expect(ClassBooking::withoutGlobalScopes()->where('member_id', $m2->id)->first()->status)->toBe('waitlisted');
 
     // m1 cancels: needs a fresh link (rotation revokes old sessions).
     $plain1b = $m1->rotatePortalToken();
+    $this->flushSession();
     portalExchange($this, $plain1b);
     $b1 = ClassBooking::withoutGlobalScopes()->where('member_id', $m1->id)->first();
     $this->delete("/my/bookings/{$b1->id}");
@@ -193,8 +215,9 @@ it('lets staff rotate the portal link, revoking the old one and live sessions', 
     $this->flushSession();
     $this->get("/my/{$plain}")->assertRedirect(route('portal.expired'));
 
-    // New link works.
-    $this->get($link)->assertRedirect(route('portal.show'));
+    // New link works: GET confirms, the explicit POST signs in.
+    $this->get($link)->assertOk()->assertInertia(fn ($page) => $page->component('MemberLinkConfirm'));
+    $this->post($link.'/exchange')->assertRedirect(route('portal.show'));
     $this->get('/my')->assertOk();
 });
 
@@ -212,9 +235,9 @@ it('expires portal links after the gym-configured lifetime', function () {
     $member->forceFill(['portal_token_issued_at' => now()->subDays(91)])->save();
     $this->get("/my/{$plain}")->assertRedirect(route('portal.expired'));
 
-    // 0 disables expiry: the same link works again.
+    // 0 disables expiry: the same link confirms again.
     $gym->update(['portal_link_days' => 0]);
-    $this->get("/my/{$plain}")->assertRedirect(route('portal.show'));
+    $this->get("/my/{$plain}")->assertOk()->assertInertia(fn ($page) => $page->component('MemberLinkConfirm'));
 });
 
 it('lets the owner set the portal link lifetime from settings', function () {

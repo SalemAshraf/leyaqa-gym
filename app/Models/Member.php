@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Member extends Model
@@ -132,6 +133,41 @@ class Member extends Model
     public function consumePortalToken(): void
     {
         $this->forceFill(['portal_token' => static::hashPortalToken((string) Str::uuid())])->save();
+    }
+
+    /**
+     * Atomically exchange a plaintext bootstrap token for its member: the row
+     * is locked, the expiry rule re-checked and the token consumed in one
+     * transaction, so two simultaneous exchanges cannot both succeed.
+     * Returns null when the token is unknown or expired.
+     */
+    public static function exchangePortalToken(string $plain): ?self
+    {
+        if ($plain === '') {
+            return null;
+        }
+
+        return DB::transaction(function () use ($plain) {
+            $member = static::withoutGlobalScopes()
+                ->with('gym')
+                ->where('portal_token', static::hashPortalToken($plain))
+                ->lockForUpdate()
+                ->first();
+
+            if (! $member) {
+                return null;
+            }
+
+            $days = (int) ($member->gym?->portal_link_days ?? 90);
+            if ($days > 0 && $member->portal_token_issued_at
+                && $member->portal_token_issued_at->addDays($days)->isPast()) {
+                return null;
+            }
+
+            $member->consumePortalToken();
+
+            return $member;
+        });
     }
 
     public function currentSubscription(): ?Subscription

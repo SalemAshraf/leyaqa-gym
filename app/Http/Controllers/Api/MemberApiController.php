@@ -23,10 +23,11 @@ class MemberApiController extends Controller
     {
         $data = $request->validate(['token' => 'required|string|max:200']);
 
-        $member = Member::findByPortalToken($data['token']);
+        // Explicit user intent (the member tapped sign-in in the app), so the
+        // POST consumes - atomically, so a replay or race gets a 401.
+        $member = Member::exchangePortalToken($data['token']);
         abort_unless($member, 401, 'Invalid member token');
 
-        $member->consumePortalToken();
         [$session, $plain] = MemberPortalSession::mint($member, 'api');
 
         return response()->json([

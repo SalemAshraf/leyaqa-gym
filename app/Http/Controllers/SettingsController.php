@@ -38,6 +38,10 @@ class SettingsController extends Controller
             ],
             'portal_link_days' => (int) ($gym->portal_link_days ?? 90),
             'renewal_invoices_enabled' => (bool) $gym->renewal_invoices_enabled,
+            'commission' => [
+                'enabled' => (bool) $gym->commission_enabled,
+                'pt_percent' => (float) $gym->pt_commission_percent,
+            ],
         ]);
     }
 
@@ -80,6 +84,26 @@ class SettingsController extends Controller
         abort_unless($request->user()->can('gym.manage'), 403);
         $data = $request->validate(['enabled' => 'required|boolean']);
         $request->user()->gym->forceFill(['renewal_invoices_enabled' => $data['enabled']])->save();
+
+        return back()->with('success', 'تم حفظ الإعدادات');
+    }
+
+    /**
+     * Coach commission proposal: a reversible configuration the owner can
+     * flip off any time. It prices nothing, charges nothing and creates no
+     * payroll obligation - it only stores the rate the gym WOULD use.
+     */
+    public function commissionSave(Request $request)
+    {
+        abort_unless($request->user()->can('gym.manage'), 403);
+        $data = $request->validate([
+            'enabled' => 'required|boolean',
+            'pt_percent' => 'required|numeric|min:0|max:100',
+        ]);
+        $request->user()->gym->forceFill([
+            'commission_enabled' => $data['enabled'],
+            'pt_commission_percent' => $data['pt_percent'],
+        ])->save();
 
         return back()->with('success', 'تم حفظ الإعدادات');
     }
