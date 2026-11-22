@@ -39,7 +39,7 @@ void main() {
 
   test('parseToken accepts a raw token or a full portal URL', () {
     expect(MemberApi.parseToken('abc123'), 'abc123');
-    final t48 = 'CvYph4tg18cneAatM5EdjDcrPzXWaPzxRMre7MmtN8WUbKuB';
+    const t48 = 'CvYph4tg18cneAatM5EdjDcrPzXWaPzxRMre7MmtN8WUbKuB';
     expect(MemberApi.parseToken('https://gym.example/my/$t48'), t48);
     expect(MemberApi.parseToken('https://gym.example/my/1a412e03-9648-4645-81bd-7ab73c97671a'), '1a412e03-9648-4645-81bd-7ab73c97671a');
     expect(MemberApi.parseToken(''), '');

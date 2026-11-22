@@ -22,6 +22,24 @@ class MemberApi {
 
   Uri _u(String path) => Uri.parse('$baseUrl$_prefix$path');
 
+  /// Exchange the single-use bootstrap token (from the staff-shared link)
+  /// for a bounded session token. The stored session token is what the app
+  /// keeps; the link itself is dead after this call.
+  static Future<String> exchange(String baseUrl, String bootstrapToken) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl$_prefix/session'),
+      headers: const {'Accept': 'application/json', 'Content-Type': 'application/json'},
+      body: jsonEncode({'token': bootstrapToken}),
+    );
+    if (res.statusCode == 401) {
+      throw MemberAuthException();
+    }
+    if (res.statusCode != 201) {
+      throw MemberApiException(res.statusCode, res.body);
+    }
+    return (jsonDecode(res.body) as Map<String, dynamic>)['token'] as String;
+  }
+
   Future<Map<String, dynamic>> _get(String path) async {
     final res = await http.get(_u(path), headers: _headers);
     if (res.statusCode == 401) {

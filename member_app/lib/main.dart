@@ -104,9 +104,11 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try {
-      // Validate the token before storing it.
-      await MemberApi(baseUrl: kServerUrl, token: token).profile();
-      widget.onToken(token);
+      // Exchange the one-time link for a bounded session token, then store
+      // the session token (never the link itself).
+      final sessionToken = await MemberApi.exchange(kServerUrl, token);
+      await MemberApi(baseUrl: kServerUrl, token: sessionToken).profile();
+      widget.onToken(sessionToken);
     } on MemberAuthException {
       setState(() => _error = 'الرابط غير صحيح. اطلب رابطك من الجيم.');
     } catch (_) {
