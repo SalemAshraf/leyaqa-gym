@@ -52,18 +52,18 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
                     <span class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-400/10 px-3 py-1 text-xs font-bold text-brand-300">
                         <span class="h-1.5 w-1.5 rounded-full bg-brand-400"></span>{{ t('hero_badge') }}
                     </span>
-                    <h1 class="mt-5 text-4xl font-black leading-[1.15] tracking-tight text-white lg:text-6xl">
+                    <h1 class="mt-7 text-4xl font-black leading-[1.35] tracking-tight text-white lg:mt-8 lg:text-6xl lg:leading-[1.25]">
                         {{ t('hero_title_a') }}
                         <span class="bg-gradient-to-l from-brand-300 to-brand-500 bg-clip-text text-transparent">{{ t('hero_title_b') }}</span>
                     </h1>
-                    <p class="mt-5 max-w-lg text-lg leading-relaxed text-slate-300">{{ t('hero_sub') }}</p>
-                    <div class="mt-8 flex flex-wrap items-center gap-3">
+                    <p class="mt-6 max-w-lg text-lg leading-[1.9] text-slate-300 lg:mt-7">{{ t('hero_sub') }}</p>
+                    <div class="mt-9 flex flex-wrap items-center gap-4 lg:mt-10">
                         <Link :href="route('register')" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-400 px-7 py-3.5 text-base font-extrabold text-[#0B1220] shadow-[0_8px_30px_rgba(52,211,153,0.4)] transition hover:-translate-y-0.5 hover:bg-brand-300">{{ trialDays ? t('start_trial_days').replace('{d}', num(trialDays)) : t('start_register') }}</Link>
                         <a v-if="salesUrl" :href="salesUrl" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-xl border border-white/20 px-7 py-3.5 text-base font-bold text-white transition hover:bg-white/10">{{ t('contact_sales_wa') }}</a>
                     </div>
-                    <p v-if="trialDays" class="mt-3 text-xs text-slate-400">{{ t('trial_note') }}</p>
-                    <div class="mt-10 flex flex-wrap gap-2">
-                        <span v-for="chip in ['qr_checkin', 'classes_wl', 'bilingual', 'wa_reminders']" :key="chip" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-slate-300">{{ t('feat_' + chip) }}</span>
+                    <p v-if="trialDays" class="mt-4 text-xs text-slate-400">{{ t('trial_note') }}</p>
+                    <div class="mt-11 flex flex-wrap gap-2.5 lg:mt-12">
+                        <span v-for="chip in ['qr_checkin', 'classes_wl', 'bilingual', 'wa_reminders']" :key="chip" class="rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold text-slate-300">{{ t('feat_' + chip) }}</span>
                     </div>
                 </div>
                 <div class="relative">
