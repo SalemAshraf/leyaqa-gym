@@ -13,6 +13,7 @@ class Permissions
         'subscriptions.manage',
         'payments.manage',
         'checkins.manage',
+        'classes.manage',
         'reports.view',
         'gym.manage',
         'staff.manage',
@@ -23,6 +24,7 @@ class Permissions
         'subscriptions.manage',
         'payments.manage',
         'checkins.manage',
+        'classes.manage',
         'reports.view',
     ];
 

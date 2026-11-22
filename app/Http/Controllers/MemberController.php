@@ -10,6 +10,59 @@ use Inertia\Inertia;
 
 class MemberController extends Controller
 {
+    /**
+     * LIKE patterns tolerant of Arabic letter variants (hamza/alef, yaa, taa marbuta),
+     * so "احمد" also matches "أحمد".
+     */
+    private static function arabicSearchPatterns(string $q): array
+    {
+        $groups = [
+            ["\u{0627}", "\u{0623}", "\u{0625}", "\u{0622}", "\u{0671}"], // alef variants
+            ["\u{064A}", "\u{0649}", "\u{0626}"],                          // yaa / alef maqsura / hamza-on-yaa
+            ["\u{0648}", "\u{0624}"],                                       // waw / hamza-on-waw
+            ["\u{0647}", "\u{0629}"],                                       // haa / taa marbuta
+        ];
+
+        $patterns = [$q];
+        foreach ($groups as $group) {
+            $next = [];
+            foreach ($patterns as $pattern) {
+                $occurrences = [];
+                foreach ($group as $ch) {
+                    $pos = 0;
+                    while (($pos = mb_strpos($pattern, $ch, $pos)) !== false) {
+                        $occurrences[] = [$pos, $ch];
+                        $pos += mb_strlen($ch);
+                    }
+                }
+                // Replace ONE occurrence at a time so words with two matching letters
+                // (e.g. ابراهيم) produce every mixed variant.
+                foreach ($occurrences as [$pos, $ch]) {
+                    foreach ($group as $rep) {
+                        $next[] = mb_substr($pattern, 0, $pos) . $rep . mb_substr($pattern, $pos + mb_strlen($ch));
+                    }
+                }
+            }
+            $patterns = array_values(array_unique(array_merge($patterns, $next)));
+            if (count($patterns) > 64) {
+                $patterns = array_slice($patterns, 0, 64);
+                break;
+            }
+        }
+
+        return $patterns;
+    }
+
+    private static function applyNameSearch($query, string $q): void
+    {
+        $query->where(function ($w) use ($q) {
+            foreach (self::arabicSearchPatterns($q) as $pattern) {
+                $w->orWhere('name', 'like', "%{$pattern}%");
+            }
+            $w->orWhere('phone', 'like', "%{$q}%");
+        });
+    }
+
     public function index(Request $request)
     {
         abort_unless($request->user()->can('members.manage'), 403);
@@ -17,9 +70,7 @@ class MemberController extends Controller
         $query = Member::query()->with(['subscriptions.payments', 'subscriptions.plan']);
 
         if ($search = $request->string('search')->trim()->toString()) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%");
-            });
+            self::applyNameSearch($query, $search);
         }
 
         $members = $query->orderByDesc('created_at')->paginate(20)->through(function (Member $m) {
@@ -47,6 +98,20 @@ class MemberController extends Controller
             'members' => $members,
             'filters' => ['search' => $request->string('search')->toString()],
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        abort_unless($request->user()->can('members.manage'), 403);
+
+        $q = trim((string) $request->query('q', ''));
+
+        return Member::query()
+            ->where('status', 'active')
+            ->when($q !== '', fn ($query) => self::applyNameSearch($query, $q))
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name', 'phone']);
     }
 
     public function store(Request $request)

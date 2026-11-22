@@ -23,6 +23,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('reports', \App\Http\Controllers\ReportsController::class)->name('reports');
 
+    Route::get('classes', [\App\Http\Controllers\ClassController::class, 'index'])->name('classes.index');
+    Route::post('classes', [\App\Http\Controllers\ClassController::class, 'store'])->name('classes.store');
+    Route::put('classes/{class}', [\App\Http\Controllers\ClassController::class, 'update'])->name('classes.update');
+    Route::delete('classes/{class}', [\App\Http\Controllers\ClassController::class, 'destroy'])->name('classes.destroy');
+    Route::post('classes/{class}/bookings', [\App\Http\Controllers\ClassBookingController::class, 'store'])->name('classes.bookings.store');
+    Route::delete('bookings/{booking}', [\App\Http\Controllers\ClassBookingController::class, 'destroy'])->name('bookings.destroy');
+
+    Route::get('members/search', [MemberController::class, 'search'])->name('members.search');
     Route::resource('members', MemberController::class)->only(['index', 'store', 'show', 'update']);
     Route::resource('plans', PlanController::class)->only(['index', 'store', 'update']);
 

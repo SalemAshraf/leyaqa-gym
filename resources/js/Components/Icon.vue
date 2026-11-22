@@ -17,6 +17,7 @@ const paths = {
     users: 'M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM4 21a8 8 0 0 1 16 0',
     card: 'M3 8h18M3 8v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8M3 8l2-4h14l2 4M7 15h4',
     chart: 'M4 20V10m6 10V4m6 16v-7m4 7H2',
+    classes: 'M8 2v3m8-3v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm4 8h4m-4 4h7',
     qr: 'M4 4h5v5H4V4Zm11 0h5v5h-5V4ZM4 15h5v5H4v-5Zm11 1h2v2h-2v-2Zm3 3h2v2h-2v-2Zm-3 1h2v2h-2v-2Zm1-5h4v1h-4v-1Z',
 };
 </script>
