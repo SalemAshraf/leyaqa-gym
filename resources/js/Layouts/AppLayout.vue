@@ -30,6 +30,7 @@ const groups = computed(() => {
     const money = [];
     if (can('subscriptions.manage')) money.push({ r: 'subscriptions.index', k: 'subscriptions', icon: 'subscriptions', match: 'subscriptions.*' });
     if (can('payments.manage')) money.push({ r: 'payments.index', k: 'payments', icon: 'payments', match: 'payments.*' });
+    if (can('payments.manage')) money.push({ r: 'renewal-invoices.index', k: 'renewal_invoices', icon: 'payments', match: 'renewal-invoices.*' });
     if (can('plans.manage')) money.push({ r: 'plans.index', k: 'plans', icon: 'plans', match: 'plans.*' });
     if (money.length) g.push({ k: 'g_money', items: money });
     const admin = [];

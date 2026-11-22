@@ -55,6 +55,9 @@ Route::middleware(['auth', 'verified', 'platform.active'])->group(function () {
     Route::delete('leads/{lead}', [\App\Http\Controllers\LeadController::class, 'destroy'])->name('leads.destroy');
     Route::post('leads/{lead}/convert', [\App\Http\Controllers\LeadController::class, 'convert'])->name('leads.convert');
     Route::resource('members', MemberController::class)->only(['index', 'store', 'show', 'update']);
+    Route::get('renewal-invoices', [\App\Http\Controllers\RenewalInvoiceController::class, 'index'])->name('renewal-invoices.index');
+    Route::post('renewal-invoices/{renewalInvoice}/collect', [\App\Http\Controllers\RenewalInvoiceController::class, 'collect'])->name('renewal-invoices.collect');
+    Route::post('renewal-invoices/{renewalInvoice}/cancel', [\App\Http\Controllers\RenewalInvoiceController::class, 'cancel'])->name('renewal-invoices.cancel');
     Route::post('members/{member}/portal-link', [MemberController::class, 'rotatePortalLink'])->name('members.portal-link');
     Route::resource('plans', PlanController::class)->only(['index', 'store', 'update']);
 
