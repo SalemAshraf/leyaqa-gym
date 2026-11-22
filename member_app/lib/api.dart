@@ -76,7 +76,7 @@ class MemberApi {
   /// Accepts a raw token or a full portal URL and returns the token.
   static String parseToken(String input) {
     final trimmed = input.trim();
-    final match = RegExp(r'/my/([0-9a-fA-F-]{36})').firstMatch(trimmed);
+    final match = RegExp(r'/my/([A-Za-z0-9-]{32,64})').firstMatch(trimmed);
     return match?.group(1) ?? trimmed;
   }
 }
