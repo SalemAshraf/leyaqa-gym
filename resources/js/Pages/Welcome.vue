@@ -31,7 +31,7 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
         <header class="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 backdrop-blur">
             <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
                 <div class="flex items-center gap-2">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 font-black text-brand-400">ق</div>
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 font-black text-brand-400">ج</div>
                     <span class="text-lg font-extrabold">{{ t('brand') }}</span>
                 </div>
                 <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-500 md:flex">

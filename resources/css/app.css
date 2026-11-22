@@ -20,6 +20,11 @@
     .label { @apply mb-1 block text-sm font-medium text-slate-700; }
     .card { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]; }
     .th { @apply px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-500; }
+    .table { @apply min-w-full; }
+    .table thead { @apply border-b border-slate-200 bg-slate-50; }
+    .table th { @apply th whitespace-nowrap; }
+    .table td { @apply td; }
+    .table tbody { @apply divide-y divide-slate-100 bg-white; }
     .td { @apply px-4 py-3 text-sm; }
 }
 
