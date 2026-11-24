@@ -160,12 +160,43 @@ const price = (p) => p.price_cents == null ? t('contact_sales') : `${num(p.price
             </div>
         </section>
 
-        <footer class="border-t border-white/10 bg-[#070D1A] py-8 text-center text-sm text-slate-400">
-            <p>{{ t('brand') }} · {{ t('footer_note') }}</p>
-            <p class="mt-2 text-xs text-slate-500">
-                {{ t('footer_credit') }}
-                <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-slate-300 underline decoration-slate-600 underline-offset-2 transition hover:text-brand-300">Reviv Solutions</a>
-            </p>
+        <footer class="border-t border-white/10 bg-[#070D1A]">
+            <div class="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="space-y-4">
+                        <span class="text-lg font-extrabold text-white">{{ t('brand') }}</span>
+                        <p class="text-sm leading-relaxed text-slate-400">{{ t('footer_note') }}</p>
+                    </div>
+                    <nav :aria-label="t('f_product')">
+                        <p class="mb-4 text-sm font-bold text-white">{{ t('f_product') }}</p>
+                        <ul class="space-y-3 text-sm text-slate-400">
+                            <li><a href="#features" class="transition hover:text-brand-300">{{ t('nav_features') }}</a></li>
+                            <li><a href="#pricing" class="transition hover:text-brand-300">{{ t('nav_pricing') }}</a></li>
+                        </ul>
+                    </nav>
+                    <nav :aria-label="t('f_account')">
+                        <p class="mb-4 text-sm font-bold text-white">{{ t('f_account') }}</p>
+                        <ul class="space-y-3 text-sm text-slate-400">
+                            <li><Link :href="route('login')" class="transition hover:text-brand-300">{{ t('login') }}</Link></li>
+                            <li><Link :href="route('register')" class="transition hover:text-brand-300">{{ t('register') }}</Link></li>
+                        </ul>
+                    </nav>
+                    <div>
+                        <p class="mb-4 text-sm font-bold text-white">{{ t('f_contact') }}</p>
+                        <ul class="space-y-3 text-sm text-slate-400">
+                            <li><a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-300"><span dir="ltr">+20 109 897 1853</span></a></li>
+                            <li><a href="https://www.facebook.com/RevivSolutions" target="_blank" rel="noopener noreferrer" class="transition hover:text-brand-300">Facebook</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                    <p>© {{ new Date().getFullYear() }} {{ t('brand') }}. {{ t('f_rights') }}</p>
+                    <p>
+                        {{ t('footer_credit') }}
+                        <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-slate-300 underline decoration-slate-600 underline-offset-2 transition hover:text-brand-300">Reviv Solutions</a>
+                    </p>
+                </div>
+            </div>
         </footer>
     </div>
 </template>
