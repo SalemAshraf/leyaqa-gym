@@ -66,7 +66,7 @@ class CreateDemoGym extends Command
 
         [$gym, $owner, $paymentsCount, $checkIns] = DB::transaction(function () use ($password) {
         $gym = Gym::create([
-            'name' => 'جيم التجمع (بيانات تجريبية)',
+            'name' => 'جيم التجمع',
             'country' => 'EG',
             'currency' => 'EGP',
             'timezone' => 'Africa/Cairo',
@@ -75,7 +75,7 @@ class CreateDemoGym extends Command
         $gym->forceFill(['platform_status' => 'active', 'ai_enabled' => true])->save();
 
         $owner = User::create([
-            'name' => 'مالك تجريبي',
+            'name' => 'مالك حمدي',
             'email' => 'demo@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make($password),
@@ -84,7 +84,7 @@ class CreateDemoGym extends Command
         $owner->assignRole(Role::findByName('owner'));
 
         $reception = User::create([
-            'name' => 'ريسبشن تجريبي',
+            'name' => 'سلمى عبد الله',
             'email' => 'reception@example.com',
             'email_verified_at' => now(),
             'password' => Hash::make($password),
