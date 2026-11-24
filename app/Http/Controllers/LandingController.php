@@ -10,7 +10,7 @@ class LandingController extends Controller
     public function __invoke()
     {
         if (auth()->check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route(auth()->user()->isPlatformAdmin() ? 'platform.index' : 'dashboard');
         }
 
         return Inertia::render('Welcome', [
